@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "keywords": ["mjolnir", "electron", "load-testing"],
-  "author": "TheLunatic1 (Salman Toha) <ishrak1846@gmail.com>",
+  "author": {
+    "name": "Salman Toha",
+    "email": "ishrak1846@gmail.com"
+  },
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

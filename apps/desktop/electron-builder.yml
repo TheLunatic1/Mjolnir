@@ -34,12 +34,14 @@ linux:
   target:
     - AppImage
     - deb
-  maintainer: "TheLunatic1 (Salman Toha) <ishrak1846@gmail.com>"
+  maintainer: "Salman Toha <ishrak1846@gmail.com>"
   artifactName: ${productName}-Linux-${version}.${ext}
   executableName: mjolnir
   category: Development
   icon: resources/icon.png
   syncDesktopName: true
+deb:
+  maintainer: "Salman Toha <ishrak1846@gmail.com>"
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
