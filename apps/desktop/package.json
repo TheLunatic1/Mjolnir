@@ -2,6 +2,7 @@
   "name": "@mjolnir/desktop",
   "version": "0.1.0",
   "description": "Mjolnir Enterprise Load Testing Desktop Control Plane",
+  "desktopName": "Mjolnir",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",

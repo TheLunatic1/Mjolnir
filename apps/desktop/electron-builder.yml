@@ -1,5 +1,6 @@
 appId: com.mjolnir.loadtester
 productName: Mjolnir
+executableName: mjolnir
 copyright: Copyright © 2026 TheLunatic1 (Salman Toha)
 npmRebuild: false
 publish:
@@ -34,6 +35,10 @@ linux:
     - AppImage
     - deb
   artifactName: ${productName}-Linux-${version}.${ext}
+  executableName: mjolnir
+  category: Development
+  icon: resources/icon.png
+  syncDesktopName: true
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
