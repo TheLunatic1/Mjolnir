@@ -46,7 +46,9 @@ impl ProtocolClient for Http1Client {
         }
 
         if let Some(body) = &req.body {
-            builder = builder.body(body.clone());
+            if !body.trim().is_empty() {
+                builder = builder.body(body.clone());
+            }
         }
 
         if let Some(auth) = &req.auth {

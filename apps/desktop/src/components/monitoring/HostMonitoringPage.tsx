@@ -3,7 +3,7 @@ import { useStore } from '../../store';
 import { Button } from '../shared/Button';
 import { MetricCard } from '../dashboard/MetricCard';
 import { LiveChart } from '../dashboard/LiveChart';
-import { Server, Cpu, HardDrive, Network, Play, Square, CheckCircle2 } from 'lucide-react';
+import { Server, Cpu, HardDrive, Network, Play, Square, CheckCircle2, Sparkles, ShieldCheck, Zap } from 'lucide-react';
 
 export const HostMonitoringPage: React.FC = () => {
   const { activeScenario, setActiveScenario, hostStats, hostStatsHistory } = useStore();
@@ -48,6 +48,41 @@ export const HostMonitoringPage: React.FC = () => {
               Stop SSH Monitoring
             </Button>
           )}
+        </div>
+      </div>
+
+      {/* VIP GLYPH Advertisement Banner */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-cyan-900/40 border-2 border-purple-500/50 p-6 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-purple-500 to-indigo-500 text-white uppercase tracking-wider shadow-sm flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> Recommended Companion App
+              </span>
+              <span className="text-xs font-semibold text-purple-300">By TheLunatic1 (Salman Toha)</span>
+            </div>
+            <h2 className="text-xl font-extrabold text-white font-['Outfit',sans-serif] tracking-tight flex items-center gap-2">
+              Want Full-Powered Remote Server & Terminal Control? Use <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">GLYPH!</span>
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              While Mjolnir provides lightweight, passive CPU/RAM correlation during stress tests, <strong className="text-white font-semibold">GLYPH</strong> is your ultimate, full-scale SSH terminal and server suite! Manage Docker containers, execute interactive commands, inspect live server logs, and configure databases in real-time.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto shrink-0">
+            <div className="px-4 py-3 rounded-lg bg-black/40 border border-purple-500/30 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">Status</span>
+              <span className="text-xs font-bold text-emerald-400 flex items-center justify-center gap-1 mt-0.5">
+                <ShieldCheck className="w-3.5 h-3.5" /> 100% Optional Here
+              </span>
+            </div>
+            <div className="px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-center shadow-lg shadow-purple-600/30 border border-purple-400/40">
+              <span className="text-[10px] uppercase font-extrabold tracking-wider opacity-80 block">Pro Tip</span>
+              <span className="text-xs font-extrabold flex items-center justify-center gap-1 mt-0.5">
+                <Zap className="w-3.5 h-3.5 fill-current" /> Keep GLYPH Open Side-by-Side!
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -23,7 +23,10 @@ impl ProtocolClient for WebSocketClient {
             .unwrap()
             .as_secs();
 
-        let payload = req.body.clone().unwrap_or_else(|| "ping".to_string());
+        let payload = match &req.body {
+            Some(b) if !b.trim().is_empty() => b.clone(),
+            _ => "ping".to_string(),
+        };
         let res = connect_async(&req.url).await;
 
         let duration_us = start.elapsed().as_micros() as u64;
@@ -47,18 +50,21 @@ impl ProtocolClient for WebSocketClient {
                     is_error: false,
                 }
             }
-            Err(_) => RequestSample {
-                timestamp,
-                duration_us,
-                ttfb_us: 0,
-                dns_us: 0,
-                tcp_us: 0,
-                tls_us: 0,
-                bytes_in: 0,
-                bytes_out: payload.len() as u64,
-                status_code: 500,
-                is_error: true,
-            },
+            Err(e) => {
+                tracing::warn!("[WebSocket] Connection to {} failed: {}", req.url, e);
+                RequestSample {
+                    timestamp,
+                    duration_us,
+                    ttfb_us: 0,
+                    dns_us: 0,
+                    tcp_us: 0,
+                    tls_us: 0,
+                    bytes_in: 0,
+                    bytes_out: payload.len() as u64,
+                    status_code: 500,
+                    is_error: true,
+                }
+            }
         }
     }
 }

@@ -46,3 +46,6 @@ Thumbs.db
 .env.*.local
 *.pem
 *.key
+
+# Temporary Testing Guides & Local Documentation
+TESTING_GUIDE.md

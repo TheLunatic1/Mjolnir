@@ -32,9 +32,24 @@ pub struct AppState {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct TestScenarioPayload {
     pub execution: ExecutionProfileConfig,
     pub requests: Vec<RequestSpec>,
+    #[serde(default)]
+    pub id: Option<String>,
+    #[serde(default)]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub tls: Option<serde_json::Value>,
+    #[serde(default)]
+    pub thresholds: Option<serde_json::Value>,
+    #[serde(default)]
+    pub csv_parameter: Option<serde_json::Value>,
+    #[serde(default)]
+    pub csv_parameter_config: Option<serde_json::Value>,
 }
 
 pub async fn start_server(addr: SocketAddr, config: EngineConfig) -> Result<(), Box<dyn std::error::Error>> {

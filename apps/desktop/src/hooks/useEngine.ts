@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import type { EngineStatus } from '../types';
 
 export function useEngine() {
-  const { engineStatus, setEngineStatus, addLog, clusterMode, activeScenario, clearTelemetry } = useStore();
+  const { engineStatus, setEngineStatus, addLog, clusterMode, activeScenario, clearTelemetry, setActiveTab } = useStore();
 
   useEffect(() => {
     if (!window.mjolnir) return;
@@ -38,12 +38,28 @@ export function useEngine() {
     await window.mjolnir.engine.stop();
   }, [setEngineStatus]);
 
+  const restartEngine = useCallback(async () => {
+    if (!window.mjolnir) return;
+    setEngineStatus('stopping');
+    await window.mjolnir.engine.stop();
+    await new Promise((res) => setTimeout(res, 500));
+    setEngineStatus('starting');
+    const res = await window.mjolnir.engine.start(clusterMode);
+    if (!res.success) {
+      setEngineStatus('error');
+      addLog({ level: 'error', source: 'ipc', message: `Engine restart failed: ${res.error}` });
+    } else {
+      addLog({ level: 'info', source: 'ipc', message: `⚡ Engine restarted successfully in ${clusterMode} mode.` });
+    }
+  }, [clusterMode, setEngineStatus, addLog]);
+
   const startTest = useCallback(async () => {
     if (!window.mjolnir) return;
     clearTelemetry();
+    setActiveTab('dashboard');
     addLog({ level: 'info', source: 'ipc', message: `🚀 Launching strike: "${activeScenario.name}"` });
     await window.mjolnir.test.run(activeScenario, clusterMode);
-  }, [activeScenario, clusterMode, clearTelemetry, addLog]);
+  }, [activeScenario, clusterMode, clearTelemetry, setActiveTab, addLog]);
 
   const abortTest = useCallback(async () => {
     if (!window.mjolnir) return;
@@ -55,6 +71,7 @@ export function useEngine() {
     engineStatus,
     startEngine,
     stopEngine,
+    restartEngine,
     startTest,
     abortTest,
     isRunningTest: engineStatus === 'running',

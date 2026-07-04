@@ -27,7 +27,11 @@ impl ProtocolClient for GraphQlClient {
             .unwrap()
             .as_secs();
 
-        let query_body = req.body.as_deref().unwrap_or("{\"query\":\"{ __schema { types { name } } }\"}");
+        let default_query = "{\"query\":\"{ __schema { types { name } } }\"}";
+        let query_body = match &req.body {
+            Some(b) if !b.trim().is_empty() => b.as_str(),
+            _ => default_query,
+        };
         
         let mut builder = self.client.post(&req.url)
             .header("Content-Type", "application/json")

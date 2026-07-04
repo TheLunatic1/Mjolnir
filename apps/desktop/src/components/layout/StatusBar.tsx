@@ -16,11 +16,6 @@ export const StatusBar: React.FC = () => {
         </span>
       </div>
 
-      {/* Center: Author Attribution */}
-      <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-sans px-3 py-0.5 rounded-full bg-slate-900/60 border border-slate-800 text-slate-400">
-        <span>Made by <strong className="text-cyan-400 font-bold">TheLunatic1 (Salman Toha)</strong></span>
-      </div>
-
       {/* Right: Real-Time Micro-Metrics Ticker */}
       <div className="flex items-center gap-6 font-mono text-[11px]">
         <div className="flex items-center gap-1.5">

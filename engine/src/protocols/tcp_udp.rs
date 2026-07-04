@@ -22,7 +22,10 @@ impl ProtocolClient for TcpUdpClient {
             .unwrap()
             .as_secs();
 
-        let payload = req.body.as_deref().unwrap_or("PING\r\n");
+        let payload = match &req.body {
+            Some(b) if !b.trim().is_empty() => b.as_str(),
+            _ => "PING\r\n",
+        };
         let is_udp = req.protocol == "udp";
 
         if is_udp {

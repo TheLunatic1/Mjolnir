@@ -11,7 +11,7 @@ pub struct Http2Client {
 impl Http2Client {
     pub fn new(insecure_skip_verify: bool) -> Self {
         let client = Client::builder()
-            .http2_prior_knowledge()
+            .http2_adaptive_window(true)
             .danger_accept_invalid_certs(insecure_skip_verify)
             .pool_max_idle_per_host(1000)
             .timeout(Duration::from_secs(30))
@@ -46,7 +46,9 @@ impl ProtocolClient for Http2Client {
         }
 
         if let Some(body) = &req.body {
-            builder = builder.body(body.clone());
+            if !body.trim().is_empty() {
+                builder = builder.body(body.clone());
+            }
         }
 
         let resp = builder.send().await;
@@ -69,18 +71,21 @@ impl ProtocolClient for Http2Client {
                     is_error: status >= 400,
                 }
             }
-            Err(_) => RequestSample {
-                timestamp,
-                duration_us,
-                ttfb_us: 0,
-                dns_us: 0,
-                tcp_us: 0,
-                tls_us: 0,
-                bytes_in: 0,
-                bytes_out: req.body.as_ref().map(|b| b.len() as u64).unwrap_or(0),
-                status_code: 500,
-                is_error: true,
-            },
+            Err(e) => {
+                tracing::warn!("[HTTP/2] Request to {} failed: {}", req.url, e);
+                RequestSample {
+                    timestamp,
+                    duration_us,
+                    ttfb_us: 0,
+                    dns_us: 0,
+                    tcp_us: 0,
+                    tls_us: 0,
+                    bytes_in: 0,
+                    bytes_out: req.body.as_ref().map(|b| b.len() as u64).unwrap_or(0),
+                    status_code: 500,
+                    is_error: true,
+                }
+            }
         }
     }
 }

@@ -42,6 +42,7 @@ interface MjolnirState {
   // Past Test Reports
   pastReports: any[];
   addReport: (report: any) => void;
+  clearReports: () => void;
 }
 
 const DEFAULT_SCENARIO: TestScenario = {
@@ -176,7 +177,8 @@ export const useStore = create<MjolnirState>((set) => ({
   hostStatsHistory: [],
   addMetricsFrame: (frame) =>
     set((state) => {
-      const nextHistory = [...state.metricsHistory, frame].slice(-300); // Keep last 300 frames
+      const isNewTest = state.liveMetrics && (frame.elapsed_seconds < state.liveMetrics.elapsed_seconds || frame.total_requests < state.liveMetrics.total_requests);
+      const nextHistory = isNewTest ? [frame] : [...state.metricsHistory, frame].slice(-300); // Keep last 300 frames
       return { liveMetrics: frame, metricsHistory: nextHistory };
     }),
   addHostStatsFrame: (stats) =>
@@ -205,4 +207,5 @@ export const useStore = create<MjolnirState>((set) => ({
     set((state) => ({
       pastReports: [report, ...state.pastReports],
     })),
+  clearReports: () => set({ pastReports: [] }),
 }));

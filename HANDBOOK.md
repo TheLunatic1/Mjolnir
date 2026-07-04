@@ -20,8 +20,9 @@
 10. [Host SSH Infrastructure Monitoring](#10-host-ssh-infrastructure-monitoring)
 11. [Telemetry Exporters (InfluxDB & Datadog)](#11-telemetry-exporters-influxdb--datadog)
 12. [Reports, Analytics & Data Export](#12-reports-analytics--data-export)
-13. [Troubleshooting & Best Practices](#13-troubleshooting--best-practices)
-14. [License & Copyright](#14-license--copyright)
+13. [Step-by-Step Enterprise Testing Guide (How to Use Everything)](#13-step-by-step-enterprise-testing-guide-how-to-use-everything)
+14. [Troubleshooting & Best Practices](#14-troubleshooting--best-practices)
+15. [License & Copyright](#15-license--copyright)
 
 ---
 
@@ -312,7 +313,109 @@ After concluding a strike, Mjolnir compiles a comprehensive executive test repor
 
 ---
 
-## 13. Troubleshooting & Best Practices
+## 13. Step-by-Step Enterprise Testing Guide (How to Use Everything)
+
+This section provides comprehensive, step-by-step instructions for testing REST APIs, WebSockets, gRPC microservices, GraphQL endpoints, and scale-out distributed clusters using universal industry placeholders.
+
+### 13.1 First: If Something Goes Wrong, Where Do I Look?
+1. **The Bottom Status Bar (Inside the App):** Look at the bottom-left corner of the application window. The real-time ticker will display error states in **RED** with descriptive tags (e.g., `[HTTP] Connection Timeout` or `[IPC] Engine error`).
+2. **Your Terminal / Console Screen:** Look at the command line window where the application daemon was launched. Deep system errors, network stack exceptions, or native runtime crashes will print out in plain text.
+
+### 13.2 Verifying Controls & License Attribution
+1. **Check the License Attribution:** Look at the bottom-left corner (beneath the Engine Status indicator). It should visibly display: **Made by TheLunatic1 (Salman Toha)**.
+2. **Check the Status Dot:** Next to **Engine Status**, there is a glowing status indicator. It should display as blue or green (`idle` or `running`).
+3. **Test the Restart Engine Button:** Look at the top-right corner of the TitleBar and click **`Restart Engine`**. The indicator dot will briefly transition to orange/yellow (`stopping` -> `starting`) and then return to glowing blue/green (`idle`).
+4. **Test the Stop Button:** Click the **`Stop`** button. The indicator will turn gray and display `stopped` or `offline`. Click **`Start Native Engine`** to reactivate the background Rust process!
+
+### 13.3 Testing REST API Endpoints (10 Virtual Users)
+1. In the left menu, click on **`Visual Builder`**.
+2. Under **Request Pipeline**:
+   - Ensure the HTTP method dropdown is set to `GET`.
+   - In the URL input box, enter a target REST API endpoint (placeholder):
+     👉 `https://api.example.com/v1/categories`
+3. Under **Execution Profile** on the right side panel:
+   - Select the first option: **`Constant VU`**.
+   - In **Virtual Users**, enter `10`. In **Duration (seconds)**, enter `15`.
+4. Click the glowing button: **`Launch Strike`**!
+5. On the **Live Dashboard**, watch the real-time line charts and latency histograms trace server performance in milliseconds.
+
+### 13.4 Ramping Virtual Users on Search Endpoints
+1. In **`Visual Builder`**, update the URL input box to point to a listing or query endpoint:
+   👉 `https://api.example.com/v1/items`
+2. Under **Execution Profile**, select **`Ramping VU`**.
+3. Click **`Launch Strike`**! Observe the green line graph for "Concurrent VUs" smoothly climb over time, maintain a steady peak, and gracefully ramp down to 0.
+
+### 13.5 Spike Testing (Sudden Traffic Explosions)
+Spike testing evaluates how backend architecture and database connection pools handle extreme, instantaneous surges in traffic.
+1. In **`Visual Builder`**, enter a search or resource-intensive endpoint:
+   👉 `https://api.example.com/v1/items?search=laptop`
+2. Under **Execution Profile**, select **`Spike Testing`**. Leave default parameters and click **`Launch Strike`**! Observe a near-vertical spike in traffic volume as the engine floods the target endpoint simultaneously.
+
+### 13.6 Constant RPS (Speed-Limit & Rate-Limit Testing)
+Instead of maintaining a fixed number of concurrent users, **Constant RPS** commands Mjolnir to generate an exact, steady stream of requests per second (e.g., exactly 50 RPS), regardless of whether server response times degrade.
+1. Go to **`Visual Builder`**, and enter target URL: `https://api.example.com/v1/categories`.
+2. Under **Execution Profile**, select **`Constant RPS`**. Set **Target RPS** to `50` and **Duration** to `15`.
+3. Click **`Launch Strike`**! On the Live Dashboard, notice how the Throughput (RPS) metric locks steadily around the 50 RPS target!
+
+### 13.7 Soak Test (Endurance & Memory Leak Verification)
+A **Soak Test** subjects the system to a moderate, continuous load over an extended period (such as several hours or overnight) to uncover cumulative system degradation and memory leaks.
+1. Go to **`Visual Builder`**, and enter target URL: `https://api.example.com/v1/categories`.
+2. Under **Execution Profile**, select **`Soak Test`**. Click **`Launch Strike`** to stream continuous endurance telemetry.
+
+### 13.8 Host SSH Stats & GLYPH Integration
+While Mjolnir generates load from the outside, how do you monitor internal Linux server CPU, memory, and disk utilization?
+1. In the left menu, click on **`Host SSH Stats`**. Notice the recommendation banner highlighting **GLYPH**!
+2. Input a remote host IP (`staging-db-01.internal`), username (`admin`), and SSH port (`22`), then click **`Connect & Monitor Host`** to correlate passive server graphs alongside your load test.
+3. For comprehensive monitoring, keep **GLYPH** open side-by-side on your desktop to monitor Docker containers, database query performance, and live syslog streams while Mjolnir drives traffic!
+
+### 13.9 Cloud Cluster (Scale-Out Architecture)
+Simulating **500,000 simultaneous users** from a single workstation can saturate local CPU sockets. To generate massive concurrency, Mjolnir utilizes a **Distributed Scale-Out Architecture** connecting multiple machines over WebSockets.
+1. In the left menu, click on **`Cloud Cluster`**.
+2. **Switch to Master Mode:** In the top TitleBar, select **`Master`** (or click **`Enable Master Mode`** on the screen).
+3. By default, Mjolnir populates simulated demo worker nodes (e.g., `worker-us-east-1a`) to demonstrate how a multi-region cluster visualizes pooled CPU cores!
+4. **Attaching Real Daemons:** To link real hardware or cloud VMs, enter the remote worker's WebSocket URI into the input field (`ws://192.168.1.50:4567/ws`) and click **`Attach Worker Node`**!
+5. Select **`Standalone`** in the top TitleBar to return to single-machine mode.
+
+### 13.10 Master Protocol Guide (HTTP/3, WebSockets, gRPC, GraphQL, TCP/UDP, MQTT)
+In addition to standard HTTP/1.1 and HTTP/2 REST URLs, you can test 6 specialized network protocols in **`Visual Builder`**:
+1. **⚡ HTTP/3 (QUIC):** Change protocol dropdown to **`HTTP/3 (QUIC)`**. Enter Target URL `https://api.example.com` and click **`Launch Strike`**!
+2. **🔌 WebSocket:** Set protocol to **`WebSocket`**. Enter Postman's public live echo server (`wss://ws.postman-echo.com/raw`) and launch to observe real-time frame streaming!
+3. **🧬 gRPC:** Set protocol to **`gRPC`**, enter URL `grpc://api.internal:50051/UserService/GetUser`, and click **`Launch Strike`**!
+4. **🔍 GraphQL:** Set protocol to **`GraphQL`**, enter endpoint `https://countries.trevorblades.com`, paste query `{"query": "{ countries { name capital currency } }"}` into the BODY tab, and launch! *(Note: If left blank, Mjolnir automatically injects a default schema introspection query!)*
+5. **📡 Raw TCP & UDP:** Set dropdown to **`Raw TCP`** or **`Raw UDP`**, enter URL `127.0.0.1:8080`, and click **`Launch Strike`**!
+6. **🤖 MQTT IoT:** Set dropdown to **`MQTT IoT`**, enter URL `mqtt://test.mosquitto.org:1883`, and launch!
+
+### 13.11 Code Mode (Custom JS/TS Scripting)
+For complex programmatic workflows or conditional logic, developers can write custom JavaScript/TypeScript scripts:
+1. In the left menu, click on **`Code Mode (JS/TS)`**.
+2. Replace editor contents with:
+   ```javascript
+   export default async function(context) {
+     const start = Date.now();
+     const res = await context.http.get('https://api.example.com/v1/locations', {
+       headers: { 'Accept': 'application/json' }
+     });
+     const duration = Date.now() - start;
+     context.metrics.recordLatency('example_locations_ms', duration);
+
+     if (res.status === 200) {
+       context.metrics.recordSuccess();
+     } else {
+       context.metrics.recordError(`API Error: ${res.status}`);
+     }
+   }
+   ```
+3. Click **`Launch Strike`** to execute your script across virtual users!
+
+### 13.12 Inspecting Reports, Exporting Audit Data & Emergency Stop
+1. In **`Reports & Export`**, click on any completed strike card to expand detailed latency percentiles (P50, P95, P99) and distribution graphs.
+2. Test **`Export CSV`**, **`Export JSON`**, and **`Export PDF Summary`** to generate printable executive report cards.
+3. In **`Settings & SLA`**, verify the **Insecure Skip Verify** SSL toggle and confirm the **Apache-2.0 License** attribution requirement.
+4. **Emergency Stop:** During any active strike, click the red **`Abort Strike`** button in the top right to instantaneously terminate all active connections and restore system stability.
+
+---
+
+## 14. Troubleshooting & Best Practices
 
 ### Issue: `ERROR: The process "2536" not found` when running `npm run dev`
 - **Explanation:** This is a benign notification from PowerShell when the development script checks if port `5173` is occupied by a stale development server. If no process is found or the old PID already closed, PowerShell reports the PID was not found. Our latest script update handles this silently.
@@ -327,6 +430,9 @@ After concluding a strike, Mjolnir compiles a comprehensive executive test repor
 ### Issue: SSL/TLS Handshake Failures against staging or self-signed servers
 - **Solution:** Navigate to **Settings & SLA** -> check **Insecure Skip Verify**. This instructs the compiled Rust core to bypass SSL certificate validation during testing.
 
+### Issue: Live Dashboard charts keeping previous stats when launching rapid consecutive attacks
+- **Solution:** When launching rapid consecutive attacks, trailing telemetry frames from a just-finished test can arrive via IPC milliseconds after the frontend resets. Our latest UI update features an automated **Smart Stream Cutoff** that detects any drop in elapsed timestamp or request count and automatically wipes stale graph history! You can also click **`Restart Engine`** at any time to instantly flush all native memory buffers.
+
 ### Best Practice: Tuning Windows/Linux File Descriptors for Extreme Load
 When generating over 10,000 concurrent VUs from a single machine, your operating system may run out of ephemeral ports or open file handles:
 - **On Linux/macOS:** Increase open file limits before launching Mjolnir:
@@ -337,7 +443,7 @@ When generating over 10,000 concurrent VUs from a single machine, your operating
 
 ---
 
-## 14. License & Copyright
+## 15. License & Copyright
 
 Mjolnir is open-source software built with passion and precision.
 

@@ -5,7 +5,7 @@ import { Badge } from '../shared/Badge';
 import { FileText, Download, Trash2, Calendar, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export const ReportsPage: React.FC = () => {
-  const { pastReports, addLog } = useStore();
+  const { pastReports, addLog, clearReports } = useStore();
 
   const handleExportHtml = async (report: any) => {
     if (!window.mjolnir) return;
@@ -48,22 +48,36 @@ export const ReportsPage: React.FC = () => {
             Completed Run Reports & PDF/HTML Export
           </h1>
         </div>
+        {pastReports.length > 0 && (
+          <Button variant="danger" size="sm" onClick={clearReports} icon={<Trash2 className="w-4 h-4" />}>
+            Clear History
+          </Button>
+        )}
       </div>
 
       <div className="space-y-4">
-        {sampleReports.map((rep) => {
-          const errorRate = (rep.failedRequests / Math.max(1, rep.totalRequests)) * 100;
+        {sampleReports.map((rep, idx) => {
+          const totalReq = rep.totalRequests ?? 0;
+          const failReq = rep.failedRequests ?? 0;
+          const peakRps = rep.peakRps ?? 0;
+          const p50 = rep.latencies?.total_duration?.p50 ?? rep.latencies?.totalDuration?.p50 ?? 0;
+          const p95 = rep.latencies?.total_duration?.p95 ?? rep.latencies?.totalDuration?.p95 ?? 0;
+          const p99 = rep.latencies?.total_duration?.p99 ?? rep.latencies?.totalDuration?.p99 ?? 0;
+          const scenarioName = rep.scenarioName ?? rep.name ?? `Mjolnir Strike Run #${idx + 1}`;
+          const timestamp = rep.timestamp ?? new Date().toLocaleString();
+          const errorRate = (failReq / Math.max(1, totalReq)) * 100;
+
           return (
-            <div key={rep.id} className="glass-card p-6 rounded-xl border border-slate-800 space-y-4 transition-all hover:border-slate-700">
+            <div key={rep.id || `rep_${idx}`} className="glass-card p-6 rounded-xl border border-slate-800 space-y-4 transition-all hover:border-slate-700">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-100 font-['Outfit',sans-serif]">{rep.scenarioName}</h3>
+                    <h3 className="text-base font-bold text-slate-100 font-['Outfit',sans-serif]">{scenarioName}</h3>
                     <span className="text-xs text-slate-400 flex items-center gap-1 font-mono mt-0.5">
-                      <Calendar className="w-3.5 h-3.5" /> Completed: {rep.timestamp}
+                      <Calendar className="w-3.5 h-3.5" /> Completed: {timestamp}
                     </span>
                   </div>
                 </div>
@@ -84,23 +98,23 @@ export const ReportsPage: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 font-mono text-xs">
                 <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                   <span className="text-slate-400 block mb-1">Total Requests</span>
-                  <span className="text-lg font-bold text-slate-100">{rep.totalRequests.toLocaleString()}</span>
+                  <span className="text-lg font-bold text-slate-100">{totalReq.toLocaleString()}</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                   <span className="text-slate-400 block mb-1">Peak RPS</span>
-                  <span className="text-lg font-bold text-emerald-400">{rep.peakRps.toLocaleString()}</span>
+                  <span className="text-lg font-bold text-emerald-400">{peakRps.toLocaleString()}</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                   <span className="text-slate-400 block mb-1">P50 Median</span>
-                  <span className="text-lg font-bold text-cyan-400">{rep.latencies?.total_duration?.p50?.toFixed(1)} ms</span>
+                  <span className="text-lg font-bold text-cyan-400">{p50.toFixed(1)} ms</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                   <span className="text-slate-400 block mb-1">P95 Latency</span>
-                  <span className="text-lg font-bold text-amber-400">{rep.latencies?.total_duration?.p95?.toFixed(1)} ms</span>
+                  <span className="text-lg font-bold text-amber-400">{p95.toFixed(1)} ms</span>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                   <span className="text-slate-400 block mb-1">P99 Latency</span>
-                  <span className="text-lg font-bold text-rose-400">{rep.latencies?.total_duration?.p99?.toFixed(1)} ms</span>
+                  <span className="text-lg font-bold text-rose-400">{p99.toFixed(1)} ms</span>
                 </div>
               </div>
             </div>
