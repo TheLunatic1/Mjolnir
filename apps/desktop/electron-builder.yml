@@ -1,6 +1,7 @@
 appId: com.mjolnir.loadtester
 productName: Mjolnir
 copyright: Copyright © 2026 TheLunatic1 (Salman Toha)
+npmRebuild: false
 directories:
   output: release/${version}
   buildResources: build

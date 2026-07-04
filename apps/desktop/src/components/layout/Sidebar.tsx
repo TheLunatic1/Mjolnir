@@ -11,6 +11,7 @@ import {
   FileText,
   Zap,
 } from 'lucide-react';
+import logoImg from '../../assets/logo.png';
 
 export const Sidebar: React.FC = () => {
   const { activeTab, setActiveTab, engineStatus } = useStore();
@@ -31,7 +32,7 @@ export const Sidebar: React.FC = () => {
       <div>
         <div className="h-16 flex items-center px-6 border-b border-slate-800/80 gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-cyan-500/30 flex items-center justify-center shadow-glow-cyan p-1 overflow-hidden">
-            <img src="/logo.png" alt="Mjolnir Logo" className="w-full h-full object-contain animate-pulse-slow drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+            <img src={logoImg} alt="Mjolnir Logo" className="w-full h-full object-contain animate-pulse-slow drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
           </div>
           <div>
             <h1 className="text-xl font-extrabold tracking-tight font-['Outfit',sans-serif] bg-gradient-to-r from-white via-slate-200 to-primary-500 bg-clip-text text-transparent">

@@ -8,3 +8,4 @@ declare global {
 }
 
 export type NavTab = 'dashboard' | 'builder' | 'editor' | 'monitoring' | 'distributed' | 'settings' | 'reports';
+

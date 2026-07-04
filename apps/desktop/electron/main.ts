@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, Menu } from 'electron';
 import path from 'path';
 import { EngineManager } from './bridge/engineManager';
 import { SshMonitorBridge } from './bridge/sshMonitor';
@@ -9,6 +9,7 @@ let engineManager: EngineManager | null = null;
 let sshMonitor: SshMonitorBridge | null = null;
 
 function createWindow(): void {
+  Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -18,6 +19,7 @@ function createWindow(): void {
     title: 'Mjolnir — Enterprise Load Testing',
     icon: path.join(__dirname, '../resources/icon.png'),
     frame: true, // Native window frame or custom titlebar
+    autoHideMenuBar: true,
     show: false,
     webPreferences: {
       preload: path.join(__dirname, '../dist-electron/preload.js'),
