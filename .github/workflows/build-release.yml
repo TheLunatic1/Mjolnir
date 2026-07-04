@@ -113,19 +113,19 @@ jobs:
 
       - name: Package Windows Release
         if: matrix.os == 'windows-latest'
-        run: npx -y pnpm@latest --filter @mjolnir/desktop exec electron-builder --win -p never
+        run: npx -y pnpm@latest --filter mjolnir-desktop exec electron-builder --win -p never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package Linux Release
         if: matrix.os == 'ubuntu-latest'
-        run: npx -y pnpm@latest --filter @mjolnir/desktop exec electron-builder --linux -p never
+        run: npx -y pnpm@latest --filter mjolnir-desktop exec electron-builder --linux -p never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package macOS Release
         if: matrix.os == 'macos-latest'
-        run: npx -y pnpm@latest --filter @mjolnir/desktop exec electron-builder --mac -p never
+        run: npx -y pnpm@latest --filter mjolnir-desktop exec electron-builder --mac -p never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

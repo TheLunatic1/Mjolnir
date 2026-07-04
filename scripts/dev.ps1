@@ -40,4 +40,4 @@ Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
         Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue
     }
 }
-Invoke-Pnpm --filter @mjolnir/desktop run dev
+Invoke-Pnpm --filter mjolnir-desktop run dev

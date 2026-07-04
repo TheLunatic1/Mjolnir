@@ -1,5 +1,5 @@
 {
-  "name": "@mjolnir/desktop",
+  "name": "mjolnir-desktop",
   "version": "0.1.0",
   "description": "Mjolnir Enterprise Load Testing Desktop Control Plane",
   "desktopName": "Mjolnir",
