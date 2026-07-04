@@ -7,15 +7,35 @@ dist/
 dist-electron/
 release/
 out/
+win-unpacked/
+mac/
+mac-arm64/
+linux-unpacked/
+**/dist/
+**/dist-electron/
+**/release/
+**/out/
+**/win-unpacked/
+**/mac/
+**/mac-arm64/
+**/linux-unpacked/
 *.tsbuildinfo
 .vite/
 .turbo/
 .cache/
 coverage/
+builder-debug.yml
+builder-effective-config.yaml
+*.blockmap
+*.AppImage
+*.deb
+*.dmg
+*.zip
 
 # Rust / Native Engine Compilation Artifacts
 target/
 engine/target/
+**/target/
 **/*.pdb
 **/*.exe
 **/*.dll

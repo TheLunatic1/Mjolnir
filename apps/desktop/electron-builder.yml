@@ -7,7 +7,7 @@ publish:
   owner: TheLunatic1
   repo: Mjolnir
 releaseInfo:
-  releaseNotesFile: RELEASE_NOTES.md
+  releaseNotesFile: ../../RELEASE_NOTES.md
 directories:
   output: release/${version}
   buildResources: build
