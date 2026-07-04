@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Mjolnir Enterprise Load & Stress Testing Platform Monorepo",
-  "author": "TheLunatic1 (Salman Toha)",
+  "author": "TheLunatic1 (Salman Toha) <ishrak1846@gmail.com>",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

@@ -10,7 +10,7 @@
     "dev": "tsc --watch"
   },
   "keywords": ["mjolnir", "load-testing", "types"],
-  "author": "TheLunatic1 (Salman Toha)",
+  "author": "TheLunatic1 (Salman Toha) <ishrak1846@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
     "typescript": "^5.4.5"

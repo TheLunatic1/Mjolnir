@@ -34,6 +34,7 @@ linux:
   target:
     - AppImage
     - deb
+  maintainer: "TheLunatic1 (Salman Toha) <ishrak1846@gmail.com>"
   artifactName: ${productName}-Linux-${version}.${ext}
   executableName: mjolnir
   category: Development
