@@ -11,6 +11,10 @@
   "keywords": ["mjolnir", "electron", "load-testing"],
   "author": "TheLunatic1 (Salman Toha)",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheLunatic1/Mjolnir.git"
+  },
   "dependencies": {
     "@mjolnir/shared-types": "workspace:*",
     "@monaco-editor/react": "^4.7.0",
