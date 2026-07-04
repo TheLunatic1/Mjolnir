@@ -8,7 +8,40 @@ export function useMetricsStream() {
     if (!window.mjolnir) return;
 
     const unsubMetrics = window.mjolnir.test.onMetricsFrame((frame: any) => {
-      addMetricsFrame(frame);
+      const normalized = {
+        ...frame,
+        elapsedSeconds: frame.elapsed_seconds ?? frame.elapsedSeconds ?? 0,
+        elapsed_seconds: frame.elapsed_seconds ?? frame.elapsedSeconds ?? 0,
+        currentVUs: frame.current_vus ?? frame.currentVUs ?? 0,
+        current_vus: frame.current_vus ?? frame.currentVUs ?? 0,
+        currentRps: frame.current_rps ?? frame.currentRps ?? 0,
+        current_rps: frame.current_rps ?? frame.currentRps ?? 0,
+        totalRequests: frame.total_requests ?? frame.totalRequests ?? 0,
+        total_requests: frame.total_requests ?? frame.totalRequests ?? 0,
+        successfulRequests: frame.successful_requests ?? frame.successfulRequests ?? 0,
+        successful_requests: frame.successful_requests ?? frame.successfulRequests ?? 0,
+        failedRequests: frame.failed_requests ?? frame.failedRequests ?? 0,
+        failed_requests: frame.failed_requests ?? frame.failedRequests ?? 0,
+        errorRate: frame.error_rate ?? frame.errorRate ?? 0,
+        error_rate: frame.error_rate ?? frame.errorRate ?? 0,
+        bandwidthInBytesPerSec: frame.bandwidth_in_bytes_per_sec ?? frame.bandwidthInBytesPerSec ?? 0,
+        bandwidth_in_bytes_per_sec: frame.bandwidth_in_bytes_per_sec ?? frame.bandwidthInBytesPerSec ?? 0,
+        bandwidthOutBytesPerSec: frame.bandwidth_out_bytes_per_sec ?? frame.bandwidthOutBytesPerSec ?? 0,
+        bandwidth_out_bytes_per_sec: frame.bandwidth_out_bytes_per_sec ?? frame.bandwidthOutBytesPerSec ?? 0,
+        latencies: frame.latencies ? {
+          ...frame.latencies,
+          totalDuration: frame.latencies.total_duration ?? frame.latencies.totalDuration,
+          total_duration: frame.latencies.total_duration ?? frame.latencies.totalDuration,
+          ttfb: frame.latencies.ttfb,
+          dnsResolution: frame.latencies.dns_resolution ?? frame.latencies.dnsResolution,
+          dns_resolution: frame.latencies.dns_resolution ?? frame.latencies.dnsResolution,
+          tcpConnect: frame.latencies.tcp_connect ?? frame.latencies.tcpConnect,
+          tcp_connect: frame.latencies.tcp_connect ?? frame.latencies.tcpConnect,
+          tlsHandshake: frame.latencies.tls_handshake ?? frame.latencies.tlsHandshake,
+          tls_handshake: frame.latencies.tls_handshake ?? frame.latencies.tlsHandshake,
+        } : undefined,
+      };
+      addMetricsFrame(normalized);
     });
 
     const unsubCompleted = window.mjolnir.test.onCompleted((summaryJson: string) => {
@@ -40,7 +73,26 @@ export function useMetricsStream() {
     });
 
     const unsubSsh = window.mjolnir.ssh.onStats((stats: any) => {
-      addHostStatsFrame(stats);
+      const normalizedStats = {
+        ...stats,
+        cpuUsagePercent: stats.cpu_usage_percent ?? stats.cpuUsagePercent ?? 0,
+        cpu_usage_percent: stats.cpu_usage_percent ?? stats.cpuUsagePercent ?? 0,
+        memoryUsagePercent: stats.memory_usage_percent ?? stats.memoryUsagePercent ?? 0,
+        memory_usage_percent: stats.memory_usage_percent ?? stats.memoryUsagePercent ?? 0,
+        memoryUsedMb: stats.memory_used_mb ?? stats.memoryUsedMb ?? 0,
+        memory_used_mb: stats.memory_used_mb ?? stats.memoryUsedMb ?? 0,
+        memoryTotalMb: stats.memory_total_mb ?? stats.memoryTotalMb ?? 0,
+        memory_total_mb: stats.memory_total_mb ?? stats.memoryTotalMb ?? 0,
+        diskIoReadKbps: stats.disk_io_read_kbps ?? stats.diskIoReadKbps ?? 0,
+        disk_io_read_kbps: stats.disk_io_read_kbps ?? stats.diskIoReadKbps ?? 0,
+        diskIoWriteKbps: stats.disk_io_write_kbps ?? stats.diskIoWriteKbps ?? 0,
+        disk_io_write_kbps: stats.disk_io_write_kbps ?? stats.diskIoWriteKbps ?? 0,
+        networkRxKbps: stats.network_rx_kbps ?? stats.networkRxKbps ?? 0,
+        network_rx_kbps: stats.network_rx_kbps ?? stats.networkRxKbps ?? 0,
+        networkTxKbps: stats.network_tx_kbps ?? stats.networkTxKbps ?? 0,
+        network_tx_kbps: stats.network_tx_kbps ?? stats.networkTxKbps ?? 0,
+      };
+      addHostStatsFrame(normalizedStats);
     });
 
     return () => {

@@ -153,35 +153,56 @@ export interface LatencyPercentiles {
 
 export interface MicrosecondMetrics {
   dnsResolution: LatencyPercentiles;
+  dns_resolution: LatencyPercentiles;
   tcpConnect: LatencyPercentiles;
+  tcp_connect: LatencyPercentiles;
   tlsHandshake: LatencyPercentiles;
+  tls_handshake: LatencyPercentiles;
   ttfb: LatencyPercentiles;
   totalDuration: LatencyPercentiles;
+  total_duration: LatencyPercentiles;
 }
 
 export interface HostStatsFrame {
   timestamp: number;
   cpuUsagePercent: number;
+  cpu_usage_percent: number;
   memoryUsagePercent: number;
+  memory_usage_percent: number;
   memoryUsedMb: number;
+  memory_used_mb: number;
   memoryTotalMb: number;
+  memory_total_mb: number;
   diskIoReadKbps: number;
+  disk_io_read_kbps: number;
   diskIoWriteKbps: number;
+  disk_io_write_kbps: number;
   networkRxKbps: number;
+  network_rx_kbps: number;
   networkTxKbps: number;
+  network_tx_kbps: number;
 }
 
 export interface LiveMetricsFrame {
   timestamp: number;
   elapsedSeconds: number;
+  elapsed_seconds: number;
   currentVUs: number;
+  current_vus: number;
   currentRps: number;
+  current_rps: number;
   totalRequests: number;
+  total_requests: number;
   successfulRequests: number;
+  successful_requests: number;
   failedRequests: number;
+  failed_requests: number;
   errorRate: number;
+  error_rate: number;
   bandwidthInBytesPerSec: number;
+  bandwidth_in_bytes_per_sec: number;
   bandwidthOutBytesPerSec: number;
+  bandwidth_out_bytes_per_sec: number;
   latencies: MicrosecondMetrics;
   hostStats?: HostStatsFrame;
   thresholdResults: {
@@ -192,7 +213,7 @@ export interface LiveMetricsFrame {
 }
 
 export interface EngineLogMessage {
-  timestamp: string;
+  timestamp?: string;
   level: 'info' | 'warn' | 'error' | 'debug';
   source: 'engine' | 'ipc' | 'ssh' | 'exporter';
   message: string;

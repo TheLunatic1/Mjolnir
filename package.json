@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "npx -y pnpm@latest --filter @mjolnir/shared-types build && npx -y pnpm@latest --filter @mjolnir/desktop run dev",
     "build:types": "npx -y pnpm@latest --filter @mjolnir/shared-types build",
-    "build:engine": "powershell -ExecutionPolicy Bypass -File ./scripts/build-engine.ps1",
+    "build:engine": "node ./scripts/build-engine.mjs",
     "build": "npx -y pnpm@latest run build:types && npx -y pnpm@latest -r run build",
     "package": "npx -y pnpm@latest run build && npx -y pnpm@latest --filter @mjolnir/desktop exec electron-builder --publish never"
   },

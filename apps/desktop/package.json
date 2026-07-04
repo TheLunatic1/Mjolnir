@@ -5,7 +5,7 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "keywords": ["mjolnir", "electron", "load-testing"],
@@ -13,7 +13,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@mjolnir/shared-types": "workspace:*",
-    "@monaco-editor/react": "^4.6.0",
+    "@monaco-editor/react": "^4.7.0",
     "chart.js": "^4.4.2",
     "lucide-react": "^0.368.0",
     "papaparse": "^5.4.1",
@@ -37,7 +37,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
     "electron": "^30.0.1",
-    "electron-builder": "^24.13.3",
+    "electron-builder": "^26.15.3",
     "vite-plugin-electron": "^0.28.8",
     "vite-plugin-electron-renderer": "^0.14.6",
     "postcss": "^8.4.38",
