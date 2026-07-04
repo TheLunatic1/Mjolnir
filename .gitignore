@@ -1,0 +1,48 @@
+# Dependencies & Package Managers
+node_modules/
+.pnpm-store/
+
+# Build Outputs & Bundles
+dist/
+dist-electron/
+release/
+out/
+*.tsbuildinfo
+.vite/
+.turbo/
+.cache/
+coverage/
+
+# Rust / Native Engine Compilation Artifacts
+target/
+engine/target/
+**/*.pdb
+**/*.exe
+**/*.dll
+**/*.so
+**/*.dylib
+apps/desktop/resources/engine/mjolnir-engine*
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS & Editor Metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment Variables & Sensitive Keys
+.env
+.env.local
+.env.*.local
+*.pem
+*.key

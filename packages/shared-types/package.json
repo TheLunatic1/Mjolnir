@@ -1,0 +1,18 @@
+{
+  "name": "@mjolnir/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript type definitions for Mjolnir Load Testing App",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["mjolnir", "load-testing", "types"],
+  "author": "TheLunatic1 (Salman Toha)",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

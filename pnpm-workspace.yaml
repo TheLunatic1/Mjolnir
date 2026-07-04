@@ -1,0 +1,9 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+allowBuilds:
+  electron: true
+  esbuild: true
+  cpu-features: false
+  ssh2: false

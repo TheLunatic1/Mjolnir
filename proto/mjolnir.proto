@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package mjolnir.v1;
+
+// The Mjolnir Distributed Cluster Service
+service MjolnirCluster {
+  // Master -> Worker: Register a new worker daemon with the control plane
+  rpc RegisterWorker (RegisterWorkerRequest) returns (RegisterWorkerResponse);
+  
+  // Master -> Worker: Send scenario strike instructions to execute
+  rpc DispatchStrike (StrikePayload) returns (StrikeResponse);
+  
+  // Worker -> Master: Stream real-time telemetry frames back to master aggregator
+  rpc StreamTelemetry (stream TelemetryFrame) returns (stream TelemetryAck);
+  
+  // Master -> Worker: Abort ongoing test execution immediately
+  rpc AbortStrike (AbortCommand) returns (AbortAck);
+}
+
+// Sample API Testing Service for users testing gRPC protocol endpoints with Mjolnir
+service EnterpriseBenchService {
+  rpc Ping (PingRequest) returns (PingResponse);
+  rpc StreamData (DataStreamRequest) returns (stream DataChunk);
+  rpc ProcessTransaction (TransactionRequest) returns (TransactionResponse);
+}
+
+message RegisterWorkerRequest {
+  string worker_id = 1;
+  string ip_address = 2;
+  int32 cpu_cores = 3;
+  int64 total_memory_mb = 4;
+  string os_platform = 5;
+  string engine_version = 6;
+}
+
+message RegisterWorkerResponse {
+  bool accepted = 1;
+  string master_session_id = 2;
+  int32 assigned_worker_index = 3;
+}
+
+message StrikePayload {
+  string test_id = 1;
+  string scenario_json = 2;
+  int32 assigned_vus = 3;
+  int64 start_timestamp_utc = 4;
+}
+
+message StrikeResponse {
+  bool started = 1;
+  string error_message = 2;
+}
+
+message TelemetryFrame {
+  string worker_id = 1;
+  string test_id = 2;
+  double elapsed_seconds = 3;
+  int32 current_vus = 4;
+  double rps = 5;
+  uint64 total_requests = 6;
+  uint64 successful_requests = 7;
+  uint64 failed_requests = 8;
+  double p50_ms = 9;
+  double p90_ms = 10;
+  double p95_ms = 11;
+  double p99_ms = 12;
+  double max_ms = 13;
+  uint64 bandwidth_rx_bps = 14;
+  uint64 bandwidth_tx_bps = 15;
+}
+
+message TelemetryAck {
+  bool received = 1;
+  bool abort_requested = 2;
+}
+
+message AbortCommand {
+  string test_id = 1;
+  string reason = 2;
+}
+
+message AbortAck {
+  bool aborted = 1;
+}
+
+// Sample Benchmarking Messages
+message PingRequest {
+  string client_id = 1;
+  int64 timestamp = 2;
+  string payload_data = 3;
+}
+
+message PingResponse {
+  string server_id = 1;
+  int64 echo_timestamp = 2;
+  string echo_data = 3;
+}
+
+message DataStreamRequest {
+  int32 chunk_count = 1;
+  int32 chunk_size_bytes = 2;
+}
+
+message DataChunk {
+  int32 chunk_index = 1;
+  bytes raw_data = 2;
+}
+
+message TransactionRequest {
+  string account_id = 1;
+  double amount = 2;
+  string currency = 3;
+  string auth_token = 4;
+}
+
+message TransactionResponse {
+  string transaction_id = 1;
+  string status = 2;
+  double new_balance = 3;
+  int64 processed_at = 4;
+}

@@ -1,0 +1,21 @@
+{
+  "name": "mjolnir-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mjolnir Enterprise Load & Stress Testing Platform Monorepo",
+  "author": "TheLunatic1 (Salman Toha)",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "npx -y pnpm@latest --filter @mjolnir/shared-types build && npx -y pnpm@latest --filter @mjolnir/desktop run dev",
+    "build:types": "npx -y pnpm@latest --filter @mjolnir/shared-types build",
+    "build:engine": "powershell -ExecutionPolicy Bypass -File ./scripts/build-engine.ps1",
+    "build": "npx -y pnpm@latest run build:types && npx -y pnpm@latest -r run build",
+    "package": "npx -y pnpm@latest run build && npx -y pnpm@latest --filter @mjolnir/desktop exec electron-builder --publish never"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,33 @@
+appId: com.mjolnir.loadtester
+productName: Mjolnir
+copyright: Copyright © 2026 TheLunatic1 (Salman Toha)
+directories:
+  output: release/${version}
+  buildResources: build
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - resources/**/*
+extraResources:
+  - from: resources/engine/
+    to: engine/
+    filter:
+      - "**/*"
+win:
+  target:
+    - nsis
+    - portable
+  artifactName: ${productName}-Windows-${version}-Setup.${ext}
+mac:
+  target:
+    - dmg
+    - zip
+  artifactName: ${productName}-macOS-${version}.${ext}
+linux:
+  target:
+    - AppImage
+    - deb
+  artifactName: ${productName}-Linux-${version}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
