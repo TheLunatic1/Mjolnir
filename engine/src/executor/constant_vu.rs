@@ -55,16 +55,28 @@ impl LoadExecutor for ConstantVuExecutor {
             let duration = Duration::from_secs(self.duration_seconds);
 
             let handle = tokio::spawn(async move {
+                let mut clients = Vec::with_capacity(reqs.len());
+                for req in reqs.iter() {
+                    clients.push(Self::get_client(&req.protocol));
+                }
+
                 let start_time = tokio::time::Instant::now();
                 while start_time.elapsed() < duration {
                     if stop.notified().now_or_never().is_some() {
                         break;
                     }
 
-                    for req in reqs.iter() {
-                        let client = Self::get_client(&req.protocol);
-                        let sample = client.execute(req).await;
-                        let _ = tx.send(sample);
+                    for (idx, req) in reqs.iter().enumerate() {
+                        if let Some(client) = clients.get(idx) {
+                            let sample = client.execute(req).await;
+                            let is_fast_error = sample.is_error && sample.duration_us < 5000;
+                            let _ = tx.send(sample);
+
+                            if is_fast_error {
+                                // Prevent CPU starvation if connections fail instantly
+                                tokio::task::yield_now().await;
+                            }
+                        }
                     }
                 }
             });

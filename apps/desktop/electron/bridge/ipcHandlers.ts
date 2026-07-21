@@ -2,11 +2,10 @@ import { ipcMain, dialog, BrowserWindow } from 'electron';
 import { EngineManager } from './engineManager';
 import { CsvParserBridge } from './csvParser';
 import { ReportGeneratorBridge } from './reportGenerator';
-import { SshMonitorBridge } from './sshMonitor';
 import { getSystemInfo } from './systemInfo';
 import { runBenchmark, cancelBenchmark } from './benchmarkRunner';
 
-export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: EngineManager, sshMonitor: SshMonitorBridge): void {
+export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: EngineManager): void {
   // ── Engine Control ──────────────────────────────────────────────────────
   ipcMain.handle('engine:start', async (_, mode, port?: number) => {
     return await engineManager.startEngine(mode, port);
@@ -63,16 +62,6 @@ export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: Engin
       finalPath = res.filePath;
     }
     return await ReportGeneratorBridge.generatePdfReport(summary, finalPath);
-  });
-
-  // ── SSH Monitoring ───────────────────────────────────────────────────────
-  ipcMain.handle('ssh:monitorStart', async (_, config) => {
-    return await sshMonitor.connectAndMonitor(config);
-  });
-
-  ipcMain.handle('ssh:monitorStop', async () => {
-    sshMonitor.stopMonitoring();
-    return { success: true };
   });
 
   // ── System Info ──────────────────────────────────────────────────────────

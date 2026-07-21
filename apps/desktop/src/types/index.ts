@@ -10,12 +10,10 @@ export type {
   ExecutionConfig,
   ThresholdRule,
   CsvParameterConfig,
-  SshMonitoringConfig,
   TelemetryExporterConfig,
   TestScenario,
   LatencyPercentiles,
   MicrosecondMetrics,
-  HostStatsFrame,
   LiveMetricsFrame,
   EngineLogMessage,
   EngineStatus,
@@ -36,7 +34,6 @@ export type NavTab =
   | 'dashboard'
   | 'builder'
   | 'editor'
-  | 'monitoring'
   | 'distributed'
   | 'benchmark'
   | 'settings'

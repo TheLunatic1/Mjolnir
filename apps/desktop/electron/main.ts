@@ -1,12 +1,10 @@
 import { app, BrowserWindow, shell, Menu } from 'electron';
 import path from 'path';
 import { EngineManager } from './bridge/engineManager';
-import { SshMonitorBridge } from './bridge/sshMonitor';
 import { setupIpcHandlers } from './bridge/ipcHandlers';
 
 let mainWindow: BrowserWindow | null = null;
 let engineManager: EngineManager | null = null;
-let sshMonitor: SshMonitorBridge | null = null;
 
 function createWindow(): void {
   Menu.setApplicationMenu(null);
@@ -30,8 +28,7 @@ function createWindow(): void {
   });
 
   engineManager = new EngineManager(mainWindow);
-  sshMonitor = new SshMonitorBridge(mainWindow);
-  setupIpcHandlers(mainWindow, engineManager, sshMonitor);
+  setupIpcHandlers(mainWindow, engineManager);
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
@@ -68,9 +65,6 @@ app.on('window-all-closed', () => {
   if (engineManager) {
     engineManager.stopEngine();
   }
-  if (sshMonitor) {
-    sshMonitor.stopMonitoring();
-  }
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -79,8 +73,5 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   if (engineManager) {
     engineManager.stopEngine();
-  }
-  if (sshMonitor) {
-    sshMonitor.stopMonitoring();
   }
 });

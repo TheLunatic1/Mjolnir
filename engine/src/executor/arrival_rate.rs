@@ -40,6 +40,12 @@ impl LoadExecutor for ConstantArrivalRateExecutor {
         let requests_arc = Arc::new(requests);
         let semaphore = Arc::new(Semaphore::new(self.max_vus as usize));
         
+        let mut clients_map = std::collections::HashMap::new();
+        for req in requests_arc.iter() {
+            clients_map.insert(req.id.clone(), ConstantVuExecutor::get_client(&req.protocol));
+        }
+        let clients_arc = Arc::new(clients_map);
+
         // Calculate interval between requests: 1,000,000 micros / target_rps
         let interval_micros = 1_000_000 / self.target_rps.max(1) as u64;
         let mut ticker = tokio::time::interval(Duration::from_micros(interval_micros));
@@ -58,14 +64,16 @@ impl LoadExecutor for ConstantArrivalRateExecutor {
                     match semaphore.clone().try_acquire_owned() {
                         Ok(permit) => {
                             let reqs = requests_arc.clone();
+                            let clients = clients_arc.clone();
                             let tx = metrics_tx.clone();
                             
                             tokio::spawn(async move {
                                 let _permit = permit; // Permit dropped when task finishes
                                 if let Some(req) = reqs.first() {
-                                    let client = ConstantVuExecutor::get_client(&req.protocol);
-                                    let sample = client.execute(req).await;
-                                    let _ = tx.send(sample);
+                                    if let Some(client) = clients.get(&req.id) {
+                                        let sample = client.execute(req).await;
+                                        let _ = tx.send(sample);
+                                    }
                                 }
                             });
                         }

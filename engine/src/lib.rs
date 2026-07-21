@@ -7,7 +7,6 @@ pub mod distributed;
 pub mod executor;
 pub mod exporters;
 pub mod metrics;
-pub mod monitoring;
 pub mod protocols;
 pub mod scripting;
 pub mod server;

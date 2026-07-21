@@ -1,9 +1,9 @@
 import React from 'react';
 import { useStore } from '../../store';
-import { ShieldAlert, Cpu, ArrowUpRight, ArrowDownRight, Terminal, ChevronUp } from 'lucide-react';
+import { ShieldAlert, ArrowUpRight, ArrowDownRight, Terminal, ChevronUp } from 'lucide-react';
 
 export const StatusBar: React.FC = () => {
-  const { engineStatus, liveMetrics, hostStats, logs, logDrawerOpen, setLogDrawerOpen } = useStore();
+  const { engineStatus, liveMetrics, logs, logDrawerOpen, setLogDrawerOpen } = useStore();
   const latestLog = logs[logs.length - 1];
   const isRunning = engineStatus === 'running';
 
@@ -48,12 +48,6 @@ export const StatusBar: React.FC = () => {
           <ArrowUpRight className="w-3 h-3 text-violet-500" />
           <span>{isRunning ? ((liveMetrics?.bandwidth_out_bytes_per_sec ?? 0) / 1024).toFixed(1) : '0.0'} KB/s</span>
         </div>
-        {hostStats && (
-          <div className="flex items-center gap-1.5 border-l border-slate-800 pl-4">
-            <Cpu className="w-3 h-3 text-rose-500" />
-            <span>Remote: <strong className="text-rose-400">{hostStats.cpu_usage_percent}%</strong></span>
-          </div>
-        )}
       </div>
     </footer>
   );

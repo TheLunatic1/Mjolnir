@@ -8,7 +8,6 @@ import { LogDrawer } from './components/layout/LogDrawer';
 import { DashboardPage } from './components/dashboard/DashboardPage';
 import { BuilderPage } from './components/builder/BuilderPage';
 import { EditorPage } from './components/editor/EditorPage';
-import { HostMonitoringPage } from './components/monitoring/HostMonitoringPage';
 import { DistributedPage } from './components/distributed/DistributedPage';
 import { BenchmarkPage } from './components/benchmark/BenchmarkPage';
 import { SettingsPage } from './components/settings/SettingsPage';
@@ -33,7 +32,6 @@ export const App: React.FC = () => {
           {activeTab === 'dashboard' && <DashboardPage />}
           {activeTab === 'builder' && <BuilderPage />}
           {activeTab === 'editor' && <EditorPage />}
-          {activeTab === 'monitoring' && <HostMonitoringPage />}
           {activeTab === 'distributed' && <DistributedPage />}
           {activeTab === 'benchmark' && <BenchmarkPage />}
           {activeTab === 'settings' && <SettingsPage />}

@@ -31,10 +31,25 @@ export const EditorPage: React.FC = () => {
     setMarkers(newMarkers);
   }, []);
 
-  const handleEditorMount = (editor: any) => {
+  const handleEditorMount = (editor: any, monaco: any) => {
     editor.onDidChangeCursorPosition((e: any) => {
       setCursorPos({ line: e.position.lineNumber, col: e.position.column });
     });
+
+    if (monaco && monaco.languages && monaco.languages.typescript) {
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(`
+        declare module 'mjolnir' {
+          export const http: {
+            get: (url: string, options?: any) => any;
+            post: (url: string, body?: any, options?: any) => any;
+            put: (url: string, body?: any, options?: any) => any;
+            delete: (url: string, options?: any) => any;
+          };
+          export const check: (res: any, checks: { [key: string]: (r: any) => boolean }) => boolean;
+          export const sleep: (seconds: number) => void;
+        }
+      `, 'file:///node_modules/@types/mjolnir/index.d.ts');
+    }
   };
 
   const errorCount = markers.filter((m) => m.severity === 8).length;

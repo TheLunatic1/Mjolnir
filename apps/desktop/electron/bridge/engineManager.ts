@@ -132,9 +132,13 @@ export class EngineManager {
 
         this.ws.on('message', (data) => {
           try {
-            const event = JSON.parse(data.toString());
+            const raw = data.toString();
+            const event = JSON.parse(raw);
+            console.log('[EngineManager] WS event received:', event.event, JSON.stringify(event.payload).substring(0, 120));
             if (event.event === 'MetricsFrame') {
-              this.sendToRenderer('metrics:frame', event.payload.frame);
+              const frame = event.payload?.frame ?? event.payload;
+              console.log('[EngineManager] Forwarding MetricsFrame to renderer, current_vus:', frame?.current_vus, 'total_requests:', frame?.total_requests);
+              this.sendToRenderer('metrics:frame', frame);
             } else if (event.event === 'StatusChanged') {
               this.sendToRenderer('engine:status', event.payload.state);
             } else if (event.event === 'TestCompleted') {

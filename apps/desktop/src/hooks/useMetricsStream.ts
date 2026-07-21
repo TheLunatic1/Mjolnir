@@ -2,12 +2,15 @@ import { useEffect } from 'react';
 import { useStore } from '../store';
 
 export function useMetricsStream() {
-  const { addMetricsFrame, addHostStatsFrame, addLog, addReport, setEngineStatus } = useStore();
+  const { addMetricsFrame, addLog, addReport, setEngineStatus } = useStore();
 
   useEffect(() => {
     if (!window.mjolnir) return;
 
     const unsubMetrics = window.mjolnir.test.onMetricsFrame((frame: any) => {
+      console.log('[useMetricsStream] MetricsFrame received:', frame?.current_vus, 'RPS:', frame?.current_rps, 'Total:', frame?.total_requests);
+      // Ensure engine is marked as running when frames arrive
+      setEngineStatus('running');
       const normalized = {
         ...frame,
         elapsedSeconds: frame.elapsed_seconds ?? frame.elapsedSeconds ?? 0,
@@ -85,33 +88,10 @@ export function useMetricsStream() {
       }
     });
 
-    const unsubSsh = window.mjolnir.ssh.onStats((stats: any) => {
-      const normalizedStats = {
-        ...stats,
-        cpuUsagePercent: stats.cpu_usage_percent ?? stats.cpuUsagePercent ?? 0,
-        cpu_usage_percent: stats.cpu_usage_percent ?? stats.cpuUsagePercent ?? 0,
-        memoryUsagePercent: stats.memory_usage_percent ?? stats.memoryUsagePercent ?? 0,
-        memory_usage_percent: stats.memory_usage_percent ?? stats.memoryUsagePercent ?? 0,
-        memoryUsedMb: stats.memory_used_mb ?? stats.memoryUsedMb ?? 0,
-        memory_used_mb: stats.memory_used_mb ?? stats.memoryUsedMb ?? 0,
-        memoryTotalMb: stats.memory_total_mb ?? stats.memoryTotalMb ?? 0,
-        memory_total_mb: stats.memory_total_mb ?? stats.memoryTotalMb ?? 0,
-        diskIoReadKbps: stats.disk_io_read_kbps ?? stats.diskIoReadKbps ?? 0,
-        disk_io_read_kbps: stats.disk_io_read_kbps ?? stats.diskIoReadKbps ?? 0,
-        diskIoWriteKbps: stats.disk_io_write_kbps ?? stats.diskIoWriteKbps ?? 0,
-        disk_io_write_kbps: stats.disk_io_write_kbps ?? stats.diskIoWriteKbps ?? 0,
-        networkRxKbps: stats.network_rx_kbps ?? stats.networkRxKbps ?? 0,
-        network_rx_kbps: stats.network_rx_kbps ?? stats.networkRxKbps ?? 0,
-        networkTxKbps: stats.network_tx_kbps ?? stats.networkTxKbps ?? 0,
-        network_tx_kbps: stats.network_tx_kbps ?? stats.networkTxKbps ?? 0,
-      };
-      addHostStatsFrame(normalizedStats);
-    });
-
     return () => {
       unsubMetrics();
       unsubCompleted();
-      unsubSsh();
     };
-  }, [addMetricsFrame, addHostStatsFrame, addLog, addReport]);
+  }, [addMetricsFrame, addLog, addReport, setEngineStatus]);
 }
+

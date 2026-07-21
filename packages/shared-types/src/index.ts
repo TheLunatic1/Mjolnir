@@ -104,16 +104,7 @@ export interface CsvParameterConfig {
   variableNames?: string[];
 }
 
-export interface SshMonitoringConfig {
-  enabled: boolean;
-  host: string;
-  port: number;
-  username: string;
-  authMethod: 'password' | 'privateKey';
-  password?: string;
-  privateKeyPath?: string;
-  pollIntervalMs: number;
-}
+
 
 export interface TelemetryExporterConfig {
   prometheus: { enabled: boolean; port: number; path: string };
@@ -130,7 +121,6 @@ export interface TestScenario {
   tls: TlsConfig;
   thresholds: ThresholdRule[];
   csv: CsvParameterConfig;
-  sshMonitoring: SshMonitoringConfig;
   exporters: TelemetryExporterConfig;
   scriptMode?: boolean;
   customTypeScript?: string;

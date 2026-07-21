@@ -4,7 +4,6 @@ import type {
   EngineStatus,
   EngineLogMessage,
   LiveMetricsFrame,
-  HostStatsFrame,
   TestScenario,
   TestReportSummary,
   BenchmarkResult,
@@ -32,10 +31,7 @@ interface MjolnirState {
   // Live Telemetry & Analytics
   liveMetrics: LiveMetricsFrame | null;
   metricsHistory: LiveMetricsFrame[];
-  hostStats: HostStatsFrame | null;
-  hostStatsHistory: HostStatsFrame[];
   addMetricsFrame: (frame: LiveMetricsFrame) => void;
-  addHostStatsFrame: (stats: HostStatsFrame) => void;
   clearTelemetry: () => void;
 
   // Logs
@@ -136,14 +132,6 @@ const DEFAULT_SCENARIO: TestScenario = {
     loop: true,
     variableNames: ['username', 'password', 'tenant_id'],
   },
-  sshMonitoring: {
-    enabled: false,
-    host: 'staging-db-01.internal',
-    port: 22,
-    username: 'ubuntu',
-    authMethod: 'password',
-    pollIntervalMs: 2000,
-  },
   exporters: {
     prometheus: { enabled: true, port: 9090, path: '/metrics' },
     influxdb: { enabled: false, url: 'http://localhost:8086', org: 'enterprise', bucket: 'mjolnir_telemetry', token: '' },
@@ -200,8 +188,6 @@ export const useStore = create<MjolnirState>()(
       // Telemetry (NOT persisted — transient)
       liveMetrics: null,
       metricsHistory: [],
-      hostStats: null,
-      hostStatsHistory: [],
       addMetricsFrame: (frame) =>
         set((state) => {
           const isNewTest =
@@ -213,13 +199,8 @@ export const useStore = create<MjolnirState>()(
             : [...state.metricsHistory, frame].slice(-300);
           return { liveMetrics: frame, metricsHistory: nextHistory };
         }),
-      addHostStatsFrame: (stats) =>
-        set((state) => {
-          const nextHistory = [...state.hostStatsHistory, stats].slice(-300);
-          return { hostStats: stats, hostStatsHistory: nextHistory };
-        }),
       clearTelemetry: () =>
-        set({ liveMetrics: null, metricsHistory: [], hostStats: null, hostStatsHistory: [] }),
+        set({ liveMetrics: null, metricsHistory: [] }),
 
       // Logs (NOT persisted — transient)
       logs: [
