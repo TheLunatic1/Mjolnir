@@ -1,11 +1,18 @@
 import React from 'react';
 import { useStore } from '../../store';
-import { Settings, Shield, Activity, Radio, Lock } from 'lucide-react';
+import { useEngine } from '../../hooks/useEngine';
+import { Settings, Shield, Activity, Radio, Lock, Power, RotateCcw, SaveAll } from 'lucide-react';
+import { Button } from '../shared/Button';
 
 export const SettingsPage: React.FC = () => {
   const { activeScenario, setActiveScenario, enginePort, setEnginePort } = useStore();
+  const { isEngineReady, restartEngine } = useEngine();
   const tls = activeScenario.tls;
   const exp = activeScenario.exporters;
+
+  const handleSaveAndRestart = async () => {
+    await restartEngine();
+  };
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6 select-none">
@@ -69,6 +76,20 @@ export const SettingsPage: React.FC = () => {
             />
             <p className="text-[11px] text-slate-500 mt-1">Must match the port passed to the native Rust engine binary.</p>
           </div>
+          <div className="pt-1">
+            {isEngineReady ? (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSaveAndRestart}
+                icon={<RotateCcw className="w-3.5 h-3.5" />}
+              >
+                Save & Restart Engine
+              </Button>
+            ) : (
+              <p className="text-[11px] text-slate-500 italic">Start the engine first to apply port changes live.</p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -84,12 +105,7 @@ export const SettingsPage: React.FC = () => {
           <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm text-slate-200 flex items-center gap-2"><Radio className="w-4 h-4 text-emerald-400" /> Prometheus</span>
-              <input
-                type="checkbox"
-                checked={exp.prometheus.enabled}
-                onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, prometheus: { ...p.exporters.prometheus, enabled: e.target.checked } } }))}
-                className="w-4 h-4 accent-emerald-500 rounded"
-              />
+              <input type="checkbox" checked={exp.prometheus.enabled} onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, prometheus: { ...p.exporters.prometheus, enabled: e.target.checked } } }))} className="w-4 h-4 accent-emerald-500 rounded" />
             </div>
             <div className="text-xs font-mono text-slate-400 space-y-2">
               <div>Port: <input type="number" value={exp.prometheus.port} onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, prometheus: { ...p.exporters.prometheus, port: Number(e.target.value) } } }))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-cyan-400 mt-1" /></div>
@@ -101,12 +117,7 @@ export const SettingsPage: React.FC = () => {
           <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm text-slate-200 flex items-center gap-2"><Radio className="w-4 h-4 text-cyan-400" /> InfluxDB v2</span>
-              <input
-                type="checkbox"
-                checked={exp.influxdb.enabled}
-                onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, influxdb: { ...p.exporters.influxdb, enabled: e.target.checked } } }))}
-                className="w-4 h-4 accent-cyan-500 rounded"
-              />
+              <input type="checkbox" checked={exp.influxdb.enabled} onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, influxdb: { ...p.exporters.influxdb, enabled: e.target.checked } } }))} className="w-4 h-4 accent-cyan-500 rounded" />
             </div>
             <div className="text-xs font-mono text-slate-400 space-y-2">
               <div>URL: <input type="text" value={exp.influxdb.url} onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, influxdb: { ...p.exporters.influxdb, url: e.target.value } } }))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 mt-1" /></div>
@@ -118,12 +129,7 @@ export const SettingsPage: React.FC = () => {
           <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm text-slate-200 flex items-center gap-2"><Radio className="w-4 h-4 text-violet-400" /> Datadog DogStatsD</span>
-              <input
-                type="checkbox"
-                checked={exp.datadog.enabled}
-                onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, datadog: { ...p.exporters.datadog, enabled: e.target.checked } } }))}
-                className="w-4 h-4 accent-violet-500 rounded"
-              />
+              <input type="checkbox" checked={exp.datadog.enabled} onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, datadog: { ...p.exporters.datadog, enabled: e.target.checked } } }))} className="w-4 h-4 accent-violet-500 rounded" />
             </div>
             <div className="text-xs font-mono text-slate-400 space-y-2">
               <div>Host: <input type="text" value={exp.datadog.host} onChange={(e) => setActiveScenario((p) => ({ ...p, exporters: { ...p.exporters, datadog: { ...p.exporters.datadog, host: e.target.value } } }))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 mt-1" /></div>

@@ -9,19 +9,20 @@ import {
   Share2,
   Settings,
   FileText,
-  Zap,
+  Gauge,
 } from 'lucide-react';
 import logoImg from '../../assets/logo.png';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, engineStatus } = useStore();
+  const { activeTab, setActiveTab, engineStatus, benchmarkResult } = useStore();
 
-  const navItems: { id: NavTab; label: string; icon: React.ReactNode }[] = [
+  const navItems: { id: NavTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'dashboard', label: 'Live Dashboard', icon: <Activity className="w-5 h-5" /> },
     { id: 'builder', label: 'Visual Builder', icon: <Sliders className="w-5 h-5" /> },
     { id: 'editor', label: 'Code Mode (JS/TS)', icon: <Code2 className="w-5 h-5" /> },
     { id: 'monitoring', label: 'Host SSH Stats', icon: <Server className="w-5 h-5" /> },
     { id: 'distributed', label: 'Cloud Cluster', icon: <Share2 className="w-5 h-5" /> },
+    { id: 'benchmark', label: 'PC Benchmark', icon: <Gauge className="w-5 h-5" />, badge: benchmarkResult ? benchmarkResult.tier.toUpperCase() : undefined },
     { id: 'reports', label: 'Reports & Export', icon: <FileText className="w-5 h-5" /> },
     { id: 'settings', label: 'Settings & SLA', icon: <Settings className="w-5 h-5" /> },
   ];
@@ -57,7 +58,15 @@ export const Sidebar: React.FC = () => {
                 }`}
               >
                 <span className={isActive ? 'text-primary-500' : 'text-slate-400'}>{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="flex-1 text-left">{item.label}</span>
+                {item.badge && (
+                  <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+                    item.badge === 'BEAST' ? 'bg-cyan-500/20 text-cyan-400'
+                    : item.badge === 'HIGH' ? 'bg-emerald-500/20 text-emerald-400'
+                    : item.badge === 'MID' ? 'bg-amber-500/20 text-amber-400'
+                    : 'bg-slate-700 text-slate-400'
+                  }`}>{item.badge}</span>
+                )}
               </button>
             );
           })}

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use tracing::{info, error};
+use tracing::info;
 
 pub struct EmbeddedJsRuntime {
     script: String,

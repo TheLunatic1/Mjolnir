@@ -3,7 +3,6 @@ use crate::metrics::RequestSample;
 use crate::protocols::RequestSpec;
 use async_trait::async_trait;
 use std::sync::Arc;
-use std::time::Duration;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::Notify;
 use tracing::info;

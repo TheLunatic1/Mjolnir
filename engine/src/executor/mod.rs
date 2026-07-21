@@ -6,8 +6,7 @@ pub mod spike;
 
 pub use constant_vu::ConstantVuExecutor;
 
-use crate::metrics::collector::MetricsCollector;
-use crate::protocols::{http1::Http1Client, http2::Http2Client, RequestSpec};
+use crate::protocols::RequestSpec;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;

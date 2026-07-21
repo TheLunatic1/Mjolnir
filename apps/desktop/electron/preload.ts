@@ -2,7 +2,8 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 const mjolnirApi = {
   engine: {
-    start: (mode?: 'standalone' | 'master' | 'worker') => ipcRenderer.invoke('engine:start', mode),
+    start: (mode?: 'standalone' | 'master' | 'worker', port?: number) =>
+      ipcRenderer.invoke('engine:start', mode, port),
     stop: () => ipcRenderer.invoke('engine:stop'),
     onStatusChange: (callback: (status: string) => void) => {
       const handler = (_: any, status: string) => callback(status);
@@ -30,11 +31,14 @@ const mjolnirApi = {
     },
   },
   csv: {
-    parse: (filePath: string, maxRows?: number) => ipcRenderer.invoke('csv:parse', { filePath, maxRows }),
+    parse: (filePath: string, maxRows?: number) =>
+      ipcRenderer.invoke('csv:parse', { filePath, maxRows }),
   },
   reports: {
-    generateHtml: (summary: any, targetPath?: string) => ipcRenderer.invoke('report:generateHtml', { summary, targetPath }),
-    generatePdf: (summary: any, targetPath?: string) => ipcRenderer.invoke('report:generatePdf', { summary, targetPath }),
+    generateHtml: (summary: any, targetPath?: string) =>
+      ipcRenderer.invoke('report:generateHtml', { summary, targetPath }),
+    generatePdf: (summary: any, targetPath?: string) =>
+      ipcRenderer.invoke('report:generatePdf', { summary, targetPath }),
   },
   ssh: {
     start: (config: any) => ipcRenderer.invoke('ssh:monitorStart', config),
@@ -44,9 +48,29 @@ const mjolnirApi = {
       ipcRenderer.on('ssh:stats', handler);
       return () => ipcRenderer.removeListener('ssh:stats', handler);
     },
+    onError: (callback: (error: string) => void) => {
+      const handler = (_: any, error: string) => callback(error);
+      ipcRenderer.on('ssh:error', handler);
+      return () => ipcRenderer.removeListener('ssh:error', handler);
+    },
+  },
+  system: {
+    getInfo: () => ipcRenderer.invoke('system:getInfo'),
+  },
+  benchmark: {
+    run: (testTarget: string) => ipcRenderer.invoke('benchmark:run', { testTarget }),
+    cancel: () => ipcRenderer.invoke('benchmark:cancel'),
+    onProgress: (callback: (phase: any) => void) => {
+      const handler = (_: any, phase: any) => callback(phase);
+      ipcRenderer.on('benchmark:progress', handler);
+      return () => ipcRenderer.removeListener('benchmark:progress', handler);
+    },
   },
   dialog: {
-    openFile: (filters?: { name: string; extensions: string[] }[]) => ipcRenderer.invoke('dialog:openFile', filters),
+    openFile: (filters?: { name: string; extensions: string[] }[]) =>
+      ipcRenderer.invoke('dialog:openFile', filters),
+    saveJson: (defaultName?: string) => ipcRenderer.invoke('dialog:saveJson', { defaultName }),
+    openJson: () => ipcRenderer.invoke('dialog:openJson'),
   },
 };
 

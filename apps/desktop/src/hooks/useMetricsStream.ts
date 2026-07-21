@@ -66,6 +66,19 @@ export function useMetricsStream() {
           },
           ...summary,
         });
+        if (live) {
+          addMetricsFrame({
+            ...live,
+            currentVUs: 0,
+            current_vus: 0,
+            currentRps: 0,
+            current_rps: 0,
+            bandwidthInBytesPerSec: 0,
+            bandwidth_in_bytes_per_sec: 0,
+            bandwidthOutBytesPerSec: 0,
+            bandwidth_out_bytes_per_sec: 0,
+          });
+        }
         addLog({ level: 'info', source: 'engine', message: '🎉 Load test completed! Report saved to history.' });
       } catch (e) {
         console.error('Failed to parse completed test summary:', e);

@@ -1,32 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store';
 import { Button } from '../shared/Button';
 import { MetricCard } from '../dashboard/MetricCard';
 import { LiveChart } from '../dashboard/LiveChart';
-import { Server, Cpu, HardDrive, Network, Play, Square, CheckCircle2, Sparkles, ShieldCheck, Zap } from 'lucide-react';
+import { Server, Cpu, HardDrive, Network, Play, Square, CheckCircle2, Sparkles, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
 
 export const HostMonitoringPage: React.FC = () => {
   const { activeScenario, setActiveScenario, hostStats, hostStatsHistory } = useStore();
   const [isMonitoring, setIsMonitoring] = useState(false);
+  const [sshError, setSshError] = useState<string | null>(null);
   const cfg = activeScenario.sshMonitoring;
+
+  // Listen for SSH errors from the main process
+  useEffect(() => {
+    if (!window.mjolnir) return;
+    const unsub = window.mjolnir.ssh.onError((error: string) => {
+      setSshError(error);
+      setIsMonitoring(false);
+    });
+    return () => { unsub(); };
+  }, []);
 
   const handleStart = async () => {
     if (!window.mjolnir) return;
+    setSshError(null);
     setIsMonitoring(true);
-    await window.mjolnir.ssh.start(cfg);
+    const res = await window.mjolnir.ssh.start(cfg);
+    if (res && !res.success) {
+      setSshError(res.error || 'Unknown SSH connection error.');
+      setIsMonitoring(false);
+    }
   };
 
   const handleStop = async () => {
     if (!window.mjolnir) return;
     setIsMonitoring(false);
+    setSshError(null);
     await window.mjolnir.ssh.stop();
   };
 
   const labels = hostStatsHistory.map((_, i) => `${i * (cfg.pollIntervalMs / 1000)}s`);
-  const cpuData = hostStatsHistory.map((f) => f.cpu_usage_percent);
-  const memData = hostStatsHistory.map((f) => f.memory_usage_percent);
-  const diskReadData = hostStatsHistory.map((f) => f.disk_io_read_kbps);
-  const diskWriteData = hostStatsHistory.map((f) => f.disk_io_write_kbps);
+  const cpuData = hostStatsHistory.map((f) => f.cpu_usage_percent ?? 0);
+  const memData = hostStatsHistory.map((f) => f.memory_usage_percent ?? 0);
+  const diskReadData = hostStatsHistory.map((f) => f.disk_io_read_kbps ?? 0);
+  const diskWriteData = hostStatsHistory.map((f) => f.disk_io_write_kbps ?? 0);
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6 select-none">
@@ -50,6 +67,18 @@ export const HostMonitoringPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* SSH Error Banner */}
+      {sshError && (
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300">
+          <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <div className="text-sm font-bold text-rose-300 mb-0.5">SSH Connection Failed</div>
+            <div className="text-xs font-mono text-rose-400/80">{sshError}</div>
+            <div className="text-[11px] text-rose-500 mt-1">Check credentials, host availability, and firewall rules.</div>
+          </div>
+        </div>
+      )}
 
       {/* VIP GLYPH Advertisement Banner */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-cyan-900/40 border-2 border-purple-500/50 p-6 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
@@ -136,34 +165,10 @@ export const HostMonitoringPage: React.FC = () => {
 
       {/* Host KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <MetricCard
-          title="CPU Utilization"
-          value={`${hostStats?.cpu_usage_percent || 0}%`}
-          subtitle="All Cores Combined"
-          icon={<Cpu className="w-6 h-6" />}
-          color="rose"
-        />
-        <MetricCard
-          title="RAM Utilization"
-          value={`${hostStats?.memory_usage_percent || 0}%`}
-          subtitle={`${Math.round(hostStats?.memory_used_mb || 0)} MB / ${Math.round(hostStats?.memory_total_mb || 16384)} MB`}
-          icon={<Server className="w-6 h-6" />}
-          color="cyan"
-        />
-        <MetricCard
-          title="Disk I/O Read/Write"
-          value={`${Math.round(hostStats?.disk_io_write_kbps || 0)} KB/s`}
-          subtitle={`Read: ${Math.round(hostStats?.disk_io_read_kbps || 0)} KB/s`}
-          icon={<HardDrive className="w-6 h-6" />}
-          color="amber"
-        />
-        <MetricCard
-          title="Network Interface TX"
-          value={`${((hostStats?.network_tx_kbps || 0) / 1024).toFixed(1)} MB/s`}
-          subtitle={`RX: ${((hostStats?.network_rx_kbps || 0) / 1024).toFixed(1)} MB/s`}
-          icon={<Network className="w-6 h-6" />}
-          color="violet"
-        />
+        <MetricCard title="CPU Utilization" value={`${hostStats?.cpu_usage_percent ?? 0}%`} subtitle="All Cores Combined" icon={<Cpu className="w-6 h-6" />} color="rose" />
+        <MetricCard title="RAM Utilization" value={`${hostStats?.memory_usage_percent ?? 0}%`} subtitle={`${Math.round(hostStats?.memory_used_mb ?? 0)} MB / ${Math.round(hostStats?.memory_total_mb ?? 16384)} MB`} icon={<Server className="w-6 h-6" />} color="cyan" />
+        <MetricCard title="Disk I/O Read/Write" value={`${Math.round(hostStats?.disk_io_write_kbps ?? 0)} KB/s`} subtitle={`Read: ${Math.round(hostStats?.disk_io_read_kbps ?? 0)} KB/s`} icon={<HardDrive className="w-6 h-6" />} color="amber" />
+        <MetricCard title="Network Interface TX" value={`${((hostStats?.network_tx_kbps ?? 0) / 1024).toFixed(1)} MB/s`} subtitle={`RX: ${((hostStats?.network_rx_kbps ?? 0) / 1024).toFixed(1)} MB/s`} icon={<Network className="w-6 h-6" />} color="violet" />
       </div>
 
       {/* Charts */}
@@ -178,7 +183,6 @@ export const HostMonitoringPage: React.FC = () => {
           ]}
           height={300}
         />
-
         <LiveChart
           title="Disk Read / Write Throughput (KB/s)"
           labels={labels}

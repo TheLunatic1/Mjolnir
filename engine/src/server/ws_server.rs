@@ -17,7 +17,7 @@ use axum::{
     Router,
 };
 use futures::{sink::SinkExt, stream::StreamExt};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
@@ -31,7 +31,8 @@ pub struct AppState {
     pub is_running: Arc<RwLock<bool>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
+#[allow(dead_code)] // Fields are received via JSON deserialization from the frontend
 #[serde(rename_all = "camelCase")]
 struct TestScenarioPayload {
     pub execution: ExecutionProfileConfig,
@@ -80,6 +81,28 @@ async fn stop_handler(State(state): State<AppState>) -> impl IntoResponse {
         "Stopped"
     } else {
         "No test running"
+    }
+}
+
+fn get_active_vus_at_time(scenario: &TestScenarioPayload, elapsed_sec: f64) -> u32 {
+    match scenario.execution.profile_type.as_str() {
+        "ramping_vu" => {
+            if let Some(stages) = &scenario.execution.stages {
+                let mut accumulated_time = 0.0;
+                for stage in stages {
+                    accumulated_time += stage.duration_seconds as f64;
+                    if elapsed_sec <= accumulated_time {
+                        return stage.target_vus.unwrap_or(10);
+                    }
+                }
+                if let Some(last) = stages.last() {
+                    return last.target_vus.unwrap_or(10);
+                }
+            }
+            scenario.execution.vus.unwrap_or(10)
+        }
+        "constant_arrival_rate" => scenario.execution.max_vus.unwrap_or(500),
+        _ => scenario.execution.vus.unwrap_or(10),
     }
 }
 
@@ -153,6 +176,7 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
                             let event_tx_clone = event_tx.clone();
                             let state_clone = state.clone();
                             let stop_clone = stop_signal.clone();
+                            let scenario_clone = scenario.clone();
 
                             // Spawn the execution harness
                             tokio::spawn(async move {
@@ -163,20 +187,21 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
                                 let collector_stop = stop_clone.clone();
                                 let stream_tx = event_tx_clone.clone();
                                 let start_time = tokio::time::Instant::now();
-                                let target_vus = scenario.execution.vus.unwrap_or(10);
-
+                                
                                 let metrics_task = tokio::spawn(async move {
                                     let mut interval = tokio::time::interval(Duration::from_millis(500));
                                     loop {
                                         tokio::select! {
                                             _ = interval.tick() => {
                                                 let elapsed = start_time.elapsed().as_secs_f64();
-                                                let frame = collector.get_live_frame(elapsed, target_vus).await;
+                                                let active_vus = get_active_vus_at_time(&scenario_clone, elapsed);
+                                                let frame = collector.get_live_frame(elapsed, active_vus).await;
                                                 let _ = stream_tx.send(IpcEvent::MetricsFrame { frame });
                                             }
                                             _ = collector_stop.notified() => {
                                                 let elapsed = start_time.elapsed().as_secs_f64();
-                                                let frame = collector.get_live_frame(elapsed, target_vus).await;
+                                                let active_vus = get_active_vus_at_time(&scenario_clone, elapsed);
+                                                let frame = collector.get_live_frame(elapsed, active_vus).await;
                                                 let _ = stream_tx.send(IpcEvent::MetricsFrame { frame });
                                                 break;
                                             }

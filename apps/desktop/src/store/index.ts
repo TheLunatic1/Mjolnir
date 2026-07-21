@@ -1,18 +1,22 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type {
   EngineStatus,
   EngineLogMessage,
   LiveMetricsFrame,
   HostStatsFrame,
   TestScenario,
-  NavTab,
-} from '../types';
+  TestReportSummary,
+  BenchmarkResult,
+  WorkerNode,
+} from '@mjolnir/shared-types';
+import type { NavTab } from '../types';
 
 interface MjolnirState {
   // Navigation & UI
   activeTab: NavTab;
   setActiveTab: (tab: NavTab) => void;
-  
+
   // Engine Core State
   engineStatus: EngineStatus;
   setEngineStatus: (status: EngineStatus) => void;
@@ -27,7 +31,7 @@ interface MjolnirState {
 
   // Live Telemetry & Analytics
   liveMetrics: LiveMetricsFrame | null;
-  metricsHistory: LiveMetricsFrame[]; // Ring buffer up to 300 points (2.5 mins @ 500ms)
+  metricsHistory: LiveMetricsFrame[];
   hostStats: HostStatsFrame | null;
   hostStatsHistory: HostStatsFrame[];
   addMetricsFrame: (frame: LiveMetricsFrame) => void;
@@ -39,10 +43,27 @@ interface MjolnirState {
   addLog: (log: EngineLogMessage) => void;
   clearLogs: () => void;
 
-  // Past Test Reports
-  pastReports: any[];
-  addReport: (report: any) => void;
+  // Log Drawer UI
+  logDrawerOpen: boolean;
+  setLogDrawerOpen: (open: boolean) => void;
+
+  // Past Test Reports (persisted)
+  pastReports: TestReportSummary[];
+  addReport: (report: TestReportSummary) => void;
   clearReports: () => void;
+
+  // Benchmark (persisted)
+  benchmarkResult: BenchmarkResult | null;
+  setBenchmarkResult: (result: BenchmarkResult | null) => void;
+  isBenchmarking: boolean;
+  setIsBenchmarking: (v: boolean) => void;
+
+  // Distributed Worker Nodes (persisted)
+  workerNodes: WorkerNode[];
+  addWorkerNode: (node: WorkerNode) => void;
+  removeWorkerNode: (id: string) => void;
+  updateWorkerNode: (id: string, updates: Partial<WorkerNode>) => void;
+  clearWorkerNodes: () => void;
 }
 
 const DEFAULT_SCENARIO: TestScenario = {
@@ -67,7 +88,7 @@ const DEFAULT_SCENARIO: TestScenario = {
       name: 'GET Production Healthcheck & Tokens',
       protocol: 'http2',
       method: 'GET',
-      url: 'https://httpbin.org/get?user={{faker.name}}&id={{faker.uuid}}',
+      url: 'https://one.one.one.one',
       headers: [
         { key: 'Accept', value: 'application/json' },
         { key: 'User-Agent', value: 'Mjolnir-Enterprise-Engine/1.0' },
@@ -86,7 +107,7 @@ const DEFAULT_SCENARIO: TestScenario = {
       name: 'POST GraphQL User Mutation Strike',
       protocol: 'http2',
       method: 'POST',
-      url: 'https://httpbin.org/post',
+      url: 'https://one.one.one.one',
       headers: [
         { key: 'Content-Type', value: 'application/json' },
       ],
@@ -144,68 +165,125 @@ export const options = {
 };
 
 export default function () {
-  const res = http.get('https://httpbin.org/json');
+  const res = http.get('https://one.one.one.one');
   check(res, {
     'status is 200': (r) => r.status === 200,
-    'has slideshow data': (r) => r.json().slideshow !== undefined,
   });
   sleep(1);
 }
 `,
 };
 
-export const useStore = create<MjolnirState>((set) => ({
-  activeTab: 'dashboard',
-  setActiveTab: (activeTab) => set({ activeTab }),
+// Zustand store with persist middleware for scenario, reports, benchmark, and workers
+export const useStore = create<MjolnirState>()(
+  persist(
+    (set, get) => ({
+      // Navigation
+      activeTab: 'dashboard',
+      setActiveTab: (activeTab) => set({ activeTab }),
 
-  engineStatus: 'stopped',
-  setEngineStatus: (engineStatus) => set({ engineStatus }),
-  enginePort: 4567,
-  setEnginePort: (enginePort) => set({ enginePort }),
-  clusterMode: 'standalone',
-  setClusterMode: (clusterMode) => set({ clusterMode }),
+      // Engine
+      engineStatus: 'stopped',
+      setEngineStatus: (engineStatus) => set({ engineStatus }),
+      enginePort: 4567,
+      setEnginePort: (enginePort) => set({ enginePort }),
+      clusterMode: 'standalone',
+      setClusterMode: (clusterMode) => set({ clusterMode }),
 
-  activeScenario: DEFAULT_SCENARIO,
-  setActiveScenario: (updater) =>
-    set((state) => ({
-      activeScenario: typeof updater === 'function' ? updater(state.activeScenario) : updater,
-    })),
+      // Scenario
+      activeScenario: DEFAULT_SCENARIO,
+      setActiveScenario: (updater) =>
+        set((state) => ({
+          activeScenario: typeof updater === 'function' ? updater(state.activeScenario) : updater,
+        })),
 
-  liveMetrics: null,
-  metricsHistory: [],
-  hostStats: null,
-  hostStatsHistory: [],
-  addMetricsFrame: (frame) =>
-    set((state) => {
-      const isNewTest = state.liveMetrics && (frame.elapsed_seconds < state.liveMetrics.elapsed_seconds || frame.total_requests < state.liveMetrics.total_requests);
-      const nextHistory = isNewTest ? [frame] : [...state.metricsHistory, frame].slice(-300); // Keep last 300 frames
-      return { liveMetrics: frame, metricsHistory: nextHistory };
+      // Telemetry (NOT persisted — transient)
+      liveMetrics: null,
+      metricsHistory: [],
+      hostStats: null,
+      hostStatsHistory: [],
+      addMetricsFrame: (frame) =>
+        set((state) => {
+          const isNewTest =
+            state.liveMetrics &&
+            (frame.elapsed_seconds < state.liveMetrics.elapsed_seconds ||
+              frame.total_requests < state.liveMetrics.total_requests);
+          const nextHistory = isNewTest
+            ? [frame]
+            : [...state.metricsHistory, frame].slice(-300);
+          return { liveMetrics: frame, metricsHistory: nextHistory };
+        }),
+      addHostStatsFrame: (stats) =>
+        set((state) => {
+          const nextHistory = [...state.hostStatsHistory, stats].slice(-300);
+          return { hostStats: stats, hostStatsHistory: nextHistory };
+        }),
+      clearTelemetry: () =>
+        set({ liveMetrics: null, metricsHistory: [], hostStats: null, hostStatsHistory: [] }),
+
+      // Logs (NOT persisted — transient)
+      logs: [
+        {
+          timestamp: new Date().toLocaleTimeString(),
+          level: 'info',
+          source: 'ipc',
+          message: '⚡ Mjolnir Control Plane initialized. Ready to spawn high-performance Rust core.',
+        },
+      ],
+      addLog: (log) =>
+        set((state) => {
+          const cleanMessage = (log.message || '').replace(/\x1b\[[0-9;]*[a-zA-Z]|E\[[0-9;]*[a-zA-Z]/g, '');
+          return {
+            logs: [
+              ...state.logs,
+              { ...log, message: cleanMessage, timestamp: log.timestamp || new Date().toLocaleTimeString() },
+            ].slice(-500),
+          };
+        }),
+      clearLogs: () => set({ logs: [] }),
+
+      // Log Drawer
+      logDrawerOpen: false,
+      setLogDrawerOpen: (logDrawerOpen) => set({ logDrawerOpen }),
+
+      // Reports (persisted)
+      pastReports: [],
+      addReport: (report) =>
+        set((state) => ({
+          pastReports: [report as TestReportSummary, ...state.pastReports],
+        })),
+      clearReports: () => set({ pastReports: [] }),
+
+      // Benchmark (persisted)
+      benchmarkResult: null,
+      setBenchmarkResult: (benchmarkResult) => set({ benchmarkResult }),
+      isBenchmarking: false,
+      setIsBenchmarking: (isBenchmarking) => set({ isBenchmarking }),
+
+      // Distributed Workers (persisted)
+      workerNodes: [],
+      addWorkerNode: (node) =>
+        set((state) => ({ workerNodes: [...state.workerNodes, node] })),
+      removeWorkerNode: (id) =>
+        set((state) => ({ workerNodes: state.workerNodes.filter((w) => w.id !== id) })),
+      updateWorkerNode: (id, updates) =>
+        set((state) => ({
+          workerNodes: state.workerNodes.map((w) => (w.id === id ? { ...w, ...updates } : w)),
+        })),
+      clearWorkerNodes: () => set({ workerNodes: [] }),
     }),
-  addHostStatsFrame: (stats) =>
-    set((state) => {
-      const nextHistory = [...state.hostStatsHistory, stats].slice(-300);
-      return { hostStats: stats, hostStatsHistory: nextHistory };
-    }),
-  clearTelemetry: () => set({ liveMetrics: null, metricsHistory: [], hostStats: null, hostStatsHistory: [] }),
-
-  logs: [
     {
-      timestamp: new Date().toLocaleTimeString(),
-      level: 'info',
-      source: 'ipc',
-      message: '⚡ Mjolnir Control Plane initialized. Ready to spawn high-performance Rust core.',
-    },
-  ],
-  addLog: (log) =>
-    set((state) => ({
-      logs: [...state.logs, { ...log, timestamp: log.timestamp || new Date().toLocaleTimeString() }].slice(-500),
-    })),
-  clearLogs: () => set({ logs: [] }),
-
-  pastReports: [],
-  addReport: (report) =>
-    set((state) => ({
-      pastReports: [report, ...state.pastReports],
-    })),
-  clearReports: () => set({ pastReports: [] }),
-}));
+      name: 'mjolnir-state',
+      storage: createJSONStorage(() => localStorage),
+      // Only persist these keys — exclude transient runtime state
+      partialize: (state) => ({
+        activeScenario: state.activeScenario,
+        enginePort: state.enginePort,
+        pastReports: state.pastReports,
+        benchmarkResult: state.benchmarkResult,
+        workerNodes: state.workerNodes,
+        clusterMode: state.clusterMode,
+      }),
+    }
+  )
+);

@@ -3,13 +3,25 @@ import { useStore } from '../store';
 import type { EngineStatus } from '../types';
 
 export function useEngine() {
-  const { engineStatus, setEngineStatus, addLog, clusterMode, activeScenario, clearTelemetry, setActiveTab } = useStore();
+  const {
+    engineStatus,
+    enginePort,
+    setEngineStatus,
+    addLog,
+    clusterMode,
+    activeScenario,
+    clearTelemetry,
+    setActiveTab,
+  } = useStore();
 
   useEffect(() => {
     if (!window.mjolnir) return;
 
     const unsubStatus = window.mjolnir.engine.onStatusChange((status: string) => {
       setEngineStatus(status as EngineStatus);
+      if (status === 'stopped') {
+        clearTelemetry();
+      }
     });
 
     const unsubLog = window.mjolnir.engine.onLog((log: any) => {
@@ -20,17 +32,18 @@ export function useEngine() {
       unsubStatus();
       unsubLog();
     };
-  }, [setEngineStatus, addLog]);
+  }, [setEngineStatus, addLog, clearTelemetry]);
 
   const startEngine = useCallback(async () => {
     if (!window.mjolnir) return;
     setEngineStatus('starting');
-    const res = await window.mjolnir.engine.start(clusterMode);
+    // Pass the configured port from the store so Settings changes take effect
+    const res = await window.mjolnir.engine.start(clusterMode, enginePort);
     if (!res.success) {
       setEngineStatus('error');
       addLog({ level: 'error', source: 'ipc', message: `Engine start failed: ${res.error}` });
     }
-  }, [clusterMode, setEngineStatus, addLog]);
+  }, [clusterMode, enginePort, setEngineStatus, addLog]);
 
   const stopEngine = useCallback(async () => {
     if (!window.mjolnir) return;
@@ -44,14 +57,14 @@ export function useEngine() {
     await window.mjolnir.engine.stop();
     await new Promise((res) => setTimeout(res, 500));
     setEngineStatus('starting');
-    const res = await window.mjolnir.engine.start(clusterMode);
+    const res = await window.mjolnir.engine.start(clusterMode, enginePort);
     if (!res.success) {
       setEngineStatus('error');
       addLog({ level: 'error', source: 'ipc', message: `Engine restart failed: ${res.error}` });
     } else {
-      addLog({ level: 'info', source: 'ipc', message: `⚡ Engine restarted successfully in ${clusterMode} mode.` });
+      addLog({ level: 'info', source: 'ipc', message: `⚡ Engine restarted successfully in ${clusterMode} mode on port ${enginePort}.` });
     }
-  }, [clusterMode, setEngineStatus, addLog]);
+  }, [clusterMode, enginePort, setEngineStatus, addLog]);
 
   const startTest = useCallback(async () => {
     if (!window.mjolnir) return;

@@ -259,3 +259,73 @@ export interface TestReportSummary {
   thresholdsPassed: boolean;
   failedThresholds: string[];
 }
+
+// ==========================================
+// System Info & Benchmark Types
+// ==========================================
+
+export interface NetworkInterface {
+  name: string;
+  address: string;
+  family: 'IPv4' | 'IPv6';
+  internal: boolean;
+}
+
+export interface SystemInfo {
+  cpuModel: string;
+  cpuCores: number;
+  cpuThreads: number;
+  cpuSpeedMhz: number;
+  totalRamMb: number;
+  freeRamMb: number;
+  platform: string;
+  arch: string;
+  osRelease: string;
+  hostname: string;
+  networkInterfaces: NetworkInterface[];
+  uptimeSeconds: number;
+}
+
+export type BenchmarkTier = 'low' | 'mid' | 'high' | 'beast';
+
+export interface BenchmarkPhaseResult {
+  name: string;
+  status: 'pending' | 'running' | 'done' | 'error';
+  durationMs: number;
+  value: number;
+  unit: string;
+  detail?: string;
+}
+
+export interface BenchmarkResult {
+  systemInfo: SystemInfo;
+  testTarget: string;
+  networkLatencyMs: number;
+  networkThroughputKbps: number;
+  concurrentConnectionsAchieved: number;
+  cpuScore: number;
+  estimatedMaxRps: number;
+  estimatedSafeVus: number;
+  estimatedNetworkCeilingMbps: number;
+  tier: BenchmarkTier;
+  phases: BenchmarkPhaseResult[];
+  completedAt: string;
+  recommendations: string[];
+}
+
+// ==========================================
+// Distributed Worker Nodes
+// ==========================================
+
+export type WorkerStatus = 'idle' | 'connecting' | 'online' | 'running' | 'error' | 'offline';
+
+export interface WorkerNode {
+  id: string;
+  url: string;
+  label: string;
+  cpus: number;
+  status: WorkerStatus;
+  rps: number;
+  errorMessage?: string;
+  connectedAt?: string;
+}

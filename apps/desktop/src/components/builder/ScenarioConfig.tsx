@@ -151,30 +151,55 @@ export const ScenarioConfig: React.FC = () => {
           <div className="grid grid-cols-3 gap-4 pt-2">
             <div>
               <label className="text-xs font-semibold text-slate-400 block mb-1">Target Rate (RPS)</label>
-              <input
-                type="number"
-                value={exec.targetRps || 100}
-                onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, targetRps: Number(e.target.value) } }))}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-emerald-400 font-bold"
-              />
+              <input type="number" value={exec.targetRps || 100} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, targetRps: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-emerald-400 font-bold" />
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-400 block mb-1">Duration (s)</label>
-              <input
-                type="number"
-                value={exec.durationSeconds || 30}
-                onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, durationSeconds: Number(e.target.value) } }))}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-200"
-              />
+              <input type="number" value={exec.durationSeconds || 30} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, durationSeconds: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-200" />
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-400 block mb-1">Max Concurrency VUs</label>
-              <input
-                type="number"
-                value={exec.maxVUs || 500}
-                onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, maxVUs: Number(e.target.value) } }))}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-cyan-400"
-              />
+              <input type="number" value={exec.maxVUs || 500} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, maxVUs: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-cyan-400" />
+            </div>
+          </div>
+        )}
+
+        {exec.profile === 'spike' && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Base VUs (Normal)</label>
+              <input type="number" value={exec.vus || 10} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, vus: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-cyan-400 font-bold" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Spike Peak VUs</label>
+              <input type="number" value={exec.maxVUs || 500} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, maxVUs: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-rose-400 font-bold" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Warmup Duration (s)</label>
+              <input type="number" value={exec.durationSeconds || 30} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, durationSeconds: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-200" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Spike Duration (s)</label>
+              <input type="number" value={exec.targetRps || 10} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, targetRps: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-amber-400" />
+              <p className="text-[10px] text-slate-500 mt-0.5">How long to hold the spike</p>
+            </div>
+          </div>
+        )}
+
+        {exec.profile === 'soak' && (
+          <div className="grid grid-cols-3 gap-4 pt-2">
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Concurrent VUs</label>
+              <input type="number" value={exec.vus || 20} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, vus: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-cyan-400 font-bold" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Duration (seconds)</label>
+              <input type="number" value={exec.durationSeconds || 3600} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, durationSeconds: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-200" />
+              <p className="text-[10px] text-slate-500 mt-0.5">Default: 3600s (1 hour)</p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-1">Think Time (ms between loops)</label>
+              <input type="number" value={exec.targetRps || 1000} onChange={(e) => setActiveScenario((p) => ({ ...p, execution: { ...p.execution, targetRps: Number(e.target.value) } }))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-violet-400" />
             </div>
           </div>
         )}
@@ -235,11 +260,45 @@ export const ScenarioConfig: React.FC = () => {
               Add SLA Rule
             </Button>
           </div>
-          <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
             {activeScenario.thresholds.map((rule, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-xs font-mono bg-slate-900/60 p-2 rounded border border-slate-800">
-                <span className="text-slate-400">Rule #{idx + 1}:</span>
-                <span className="text-cyan-400 font-bold">{rule.metric} ({rule.aggregation}) {rule.operator} {rule.value}</span>
+              <div key={idx} className="flex items-center gap-1.5 text-xs font-mono bg-slate-900/60 p-2 rounded border border-slate-800 flex-wrap">
+                <select
+                  value={rule.metric}
+                  onChange={(e) => setActiveScenario((p) => { const t = [...p.thresholds]; t[idx] = { ...t[idx], metric: e.target.value as any }; return { ...p, thresholds: t }; })}
+                  className="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-cyan-400 text-[10px]"
+                >
+                  {['http_req_duration','http_req_failed','http_req_succeeded','ttfb','dns','tcp','tls','rps','bandwidth'].map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+                <select
+                  value={rule.aggregation}
+                  onChange={(e) => setActiveScenario((p) => { const t = [...p.thresholds]; t[idx] = { ...t[idx], aggregation: e.target.value as any }; return { ...p, thresholds: t }; })}
+                  className="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-violet-400 text-[10px]"
+                >
+                  {['p50','p90','p95','p99','p999','avg','max','rate','count'].map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+                <select
+                  value={rule.operator}
+                  onChange={(e) => setActiveScenario((p) => { const t = [...p.thresholds]; t[idx] = { ...t[idx], operator: e.target.value as any }; return { ...p, thresholds: t }; })}
+                  className="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-amber-400 text-[10px]"
+                >
+                  {['<','<=','>','>=','=='].map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+                <input
+                  type="number"
+                  value={rule.value}
+                  onChange={(e) => setActiveScenario((p) => { const t = [...p.thresholds]; t[idx] = { ...t[idx], value: Number(e.target.value) }; return { ...p, thresholds: t }; })}
+                  className="w-20 bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-emerald-400 font-bold text-[10px]"
+                />
+                <label className="flex items-center gap-1 text-slate-500 text-[10px] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rule.abortOnFail ?? false}
+                    onChange={(e) => setActiveScenario((p) => { const t = [...p.thresholds]; t[idx] = { ...t[idx], abortOnFail: e.target.checked }; return { ...p, thresholds: t }; })}
+                    className="accent-rose-500"
+                  />
+                  abort
+                </label>
                 <button
                   onClick={() => setActiveScenario((p) => ({ ...p, thresholds: p.thresholds.filter((_, i) => i !== idx) }))}
                   className="ml-auto text-slate-500 hover:text-rose-400"

@@ -1,6 +1,6 @@
 use super::{ConstantVuExecutor, LoadExecutor};
 use crate::metrics::RequestSample;
-use crate::protocols::{ProtocolClient, RequestSpec};
+use crate::protocols::RequestSpec;
 use async_trait::async_trait;
 use std::sync::Arc;
 use std::time::Duration;

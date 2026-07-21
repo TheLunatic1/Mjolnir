@@ -3,10 +3,13 @@ import { EngineManager } from './engineManager';
 import { CsvParserBridge } from './csvParser';
 import { ReportGeneratorBridge } from './reportGenerator';
 import { SshMonitorBridge } from './sshMonitor';
+import { getSystemInfo } from './systemInfo';
+import { runBenchmark, cancelBenchmark } from './benchmarkRunner';
 
 export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: EngineManager, sshMonitor: SshMonitorBridge): void {
-  ipcMain.handle('engine:start', async (_, mode) => {
-    return await engineManager.startEngine(mode);
+  // ── Engine Control ──────────────────────────────────────────────────────
+  ipcMain.handle('engine:start', async (_, mode, port?: number) => {
+    return await engineManager.startEngine(mode, port);
   });
 
   ipcMain.handle('engine:stop', async () => {
@@ -14,6 +17,7 @@ export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: Engin
     return { success: true };
   });
 
+  // ── Test Control ────────────────────────────────────────────────────────
   ipcMain.handle('test:run', async (_, payload) => {
     const sent = engineManager.sendCommand({
       command: 'RunTest',
@@ -27,10 +31,12 @@ export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: Engin
     return { success: sent };
   });
 
+  // ── CSV ─────────────────────────────────────────────────────────────────
   ipcMain.handle('csv:parse', async (_, { filePath, maxRows }) => {
     return await CsvParserBridge.parseCsvFile(filePath, maxRows);
   });
 
+  // ── Reports ─────────────────────────────────────────────────────────────
   ipcMain.handle('report:generateHtml', async (_, { summary, targetPath }) => {
     let finalPath = targetPath;
     if (!finalPath) {
@@ -59,6 +65,7 @@ export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: Engin
     return await ReportGeneratorBridge.generatePdfReport(summary, finalPath);
   });
 
+  // ── SSH Monitoring ───────────────────────────────────────────────────────
   ipcMain.handle('ssh:monitorStart', async (_, config) => {
     return await sshMonitor.connectAndMonitor(config);
   });
@@ -68,10 +75,58 @@ export function setupIpcHandlers(mainWindow: BrowserWindow, engineManager: Engin
     return { success: true };
   });
 
+  // ── System Info ──────────────────────────────────────────────────────────
+  ipcMain.handle('system:getInfo', async () => {
+    try {
+      const info = getSystemInfo();
+      return { success: true, data: info };
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  });
+
+  // ── Benchmark ────────────────────────────────────────────────────────────
+  ipcMain.handle('benchmark:run', async (_, { testTarget }) => {
+    try {
+      const result = await runBenchmark(testTarget, (phase) => {
+        // Send progress updates to renderer in real-time
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('benchmark:progress', phase);
+        }
+      });
+      return { success: true, data: result };
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('benchmark:cancel', async () => {
+    cancelBenchmark();
+    return { success: true };
+  });
+
+  // ── Dialog ───────────────────────────────────────────────────────────────
   ipcMain.handle('dialog:openFile', async (_, filters) => {
     const res = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile'],
       filters: filters || [{ name: 'All Files', extensions: ['*'] }],
+    });
+    return res.canceled ? null : res.filePaths[0];
+  });
+
+  ipcMain.handle('dialog:saveJson', async (_, { defaultName }) => {
+    const res = await dialog.showSaveDialog(mainWindow, {
+      title: 'Save Scenario',
+      defaultPath: defaultName || 'mjolnir-scenario.json',
+      filters: [{ name: 'JSON Scenario', extensions: ['json'] }],
+    });
+    return res.canceled ? null : res.filePath;
+  });
+
+  ipcMain.handle('dialog:openJson', async () => {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: [{ name: 'JSON Scenario', extensions: ['json'] }],
     });
     return res.canceled ? null : res.filePaths[0];
   });

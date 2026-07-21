@@ -1,7 +1,7 @@
 use super::HostStatsFrame;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::time::interval;
-use tracing::{info, warn};
+use tracing::info;
 
 pub struct SshMonitor {
     host: String,
